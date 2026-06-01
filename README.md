@@ -10,12 +10,12 @@ Browser-based escape room where hand tracking drives four sequential 3D puzzles.
 
 Players move through four linear games (“phases”), each with a distinct interaction model:
 
-| Game | Phase | Primary input |
-|------|-------|---------------|
-| 1 — The Threshold | `phase-01` | Pinch + fingertip proximity on seals |
-| 2 — The Maze is Red | `phase-02` | WASD + mouse look + 2D hand overlay on wall spheres |
-| 3 — The Star Maze | `phase-03` | Right index “laser” paths between colored stars |
-| 4 — The Elemental Orrery | `phase-04` | Index drag + orbital rings + core seal |
+| Game                     | Phase      | Primary input                                       |
+| ------------------------ | ---------- | --------------------------------------------------- |
+| 1 — The Threshold        | `phase-01` | Pinch + fingertip proximity on seals                |
+| 2 — The Maze is Red      | `phase-02` | WASD + mouse look + 2D hand overlay on wall spheres |
+| 3 — The Star Maze        | `phase-03` | Right index “laser” paths between colored stars     |
+| 4 — The Elemental Orrery | `phase-04` | Index drag + orbital rings + core seal              |
 
 After Game 4, a finale screen shows timings, stellar confetti, and an exit link to the labs.
 
@@ -23,12 +23,12 @@ After Game 4, a finale screen shows timings, stellar confetti, and an exit link 
 
 ## Requirements
 
-| Requirement | Notes |
-|-------------|--------|
-| **Node.js 20+** | Matches Vercel production (Node 24.x). Node 20 LTS is the minimum tested locally. |
-| **npm** | Package manager used in scripts below. |
-| **Modern browser** | Chrome / Edge / Safari recommended. |
-| **Webcam** | Required for hand tracking. The intro warns the player before play starts. |
+| Requirement        | Notes                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Node.js 20+**    | Matches Vercel production (Node 24.x). Node 20 LTS is the minimum tested locally.                       |
+| **npm**            | Package manager used in scripts below.                                                                  |
+| **Modern browser** | Chrome / Edge / Safari recommended.                                                                     |
+| **Webcam**         | Required for hand tracking. The intro warns the player before play starts.                              |
 | **Secure context** | Camera APIs need `https://` or `http://localhost`. Plain HTTP on a LAN IP will not grant camera access. |
 
 No `.env` file is required for local development. MediaPipe models load from the public CDN bundled with `@mediapipe/tasks-vision`.
@@ -63,10 +63,10 @@ npm run lint    # ESLint
 
 ### Routes
 
-| Route | Purpose |
-|-------|---------|
-| `/` | Intro + camera warning |
-| `/play` | Redirects / entry to linear progression |
+| Route                 | Purpose                                 |
+| --------------------- | --------------------------------------- |
+| `/`                   | Intro + camera warning                  |
+| `/play`               | Redirects / entry to linear progression |
 | `/play/1` … `/play/4` | Start at a specific game (dev-friendly) |
 
 Progression is linear: completing a phase opens the victory modal → **Continue** loads the next environment.
@@ -205,42 +205,25 @@ src/
 
 ---
 
-## Adding a new game
-
-1. Write a design note in `src/game/design/phase-0X-name.md`.
-2. Implement `createXEnvironment(): GameEnvironment` under `src/game/environments/`.
-3. Register in `src/game/environments/registry.ts`.
-4. Add metadata to `src/game/phases/types.ts`, welcome copy, hints, and victory copy.
-5. Latch `victoryLatched` in the same tick as the success animation (see `src/game/docs/04-game-environment-contract.md`).
-
-Touch/probe patterns: `src/game/docs/05-touch-probes-and-screen-space.md`.
-
----
-
 ## Further reading
 
-| Document | Content |
-|----------|---------|
-| [`src/game/ARCHITECTURE.md`](src/game/ARCHITECTURE.md) | Short architecture summary |
-| [`src/game/docs/README.md`](src/game/docs/README.md) | Full platform doc index |
-| [`src/game/docs/01-session-and-flow.md`](src/game/docs/01-session-and-flow.md) | Session states and routes |
-| [`src/game/docs/02-ui-layers-and-overlays.md`](src/game/docs/02-ui-layers-and-overlays.md) | Z-index and overlay rules |
-| [`src/game/docs/03-hand-engine-and-input.md`](src/game/docs/03-hand-engine-and-input.md) | MediaPipe and finger frames |
-| [`src/game/design/`](src/game/design/) | Per-game design specs |
+| Document                                                                                   | Content                     |
+| ------------------------------------------------------------------------------------------ | --------------------------- |
+| [`src/game/ARCHITECTURE.md`](src/game/ARCHITECTURE.md)                                     | Short architecture summary  |
+| [`src/game/docs/README.md`](src/game/docs/README.md)                                       | Full platform doc index     |
+| [`src/game/docs/01-session-and-flow.md`](src/game/docs/01-session-and-flow.md)             | Session states and routes   |
+| [`src/game/docs/02-ui-layers-and-overlays.md`](src/game/docs/02-ui-layers-and-overlays.md) | Z-index and overlay rules   |
+| [`src/game/docs/03-hand-engine-and-input.md`](src/game/docs/03-hand-engine-and-input.md)   | MediaPipe and finger frames |
 
 ---
 
 ## Troubleshooting
 
-| Issue | Likely cause |
-|-------|----------------|
-| Camera never starts | Blocked permission, or not on `localhost` / HTTPS |
-| Hands not detected | Poor lighting, hands out of frame, or tracking still loading — wait for lobby “ready” state |
-| Game 2 mouse stuck after ESC | Click the 3D view to re-request pointer lock |
-| Black WebGL canvas | WebGL unavailable or GPU blocked — try another browser |
+| Issue                        | Likely cause                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------- |
+| Camera never starts          | Blocked permission, or not on `localhost` / HTTPS                                           |
+| Hands not detected           | Poor lighting, hands out of frame, or tracking still loading — wait for lobby “ready” state |
+| Game 2 mouse stuck after ESC | Click the 3D view to re-request pointer lock                                                |
+| Black WebGL canvas           | WebGL unavailable or GPU blocked — try another browser                                      |
 
 ---
-
-## License
-
-Private experiment (`"private": true` in `package.json`). Check with the repository owner before redistribution.
