@@ -6,15 +6,33 @@
   transform: translateX(-50%);
   z-index: 35;
   display: flex;
-  gap: 0.55rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 9999px;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 0.85rem 0.65rem;
+  border-radius: 0.625rem;
   border: 1px solid var(--ts-cyan-border);
   background: rgb(8 14 28 / 0.72);
   backdrop-filter: blur(10px);
   box-shadow:
     0 0 20px var(--ts-cyan-glow),
     0 8px 28px rgb(0 0 0 / 0.35);
+}
+
+.dots {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.hint {
+  margin: 0;
+  max-width: 14rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--ts-text-muted, rgb(148 163 184 / 0.95));
 }
 
 .dot {

@@ -29,7 +29,7 @@ export const PUZZLE_PHASES: Record<PuzzlePhaseId, PuzzlePhaseMeta> = {
     index: 2,
     gameLabel: "Game 2",
     title: "The Maze is Red",
-    subtitle: "Paint five spheres red, then the maze follows",
+    subtitle: "Paint three spheres red, then the maze follows",
   },
   "phase-03": {
     id: "phase-03",

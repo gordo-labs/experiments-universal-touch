@@ -9,7 +9,7 @@ export const PHASE_WELCOME_COPY: Record<PuzzlePhaseId, PhaseWelcomeCopy> = {
     body: "Five seals hold the threshold closed. Wake each one, then discover what the center becomes.",
   },
   "phase-02": {
-    body: "Somewhere in the red maze, five lights still burn against the dark. Find them, paint them with your touch, and the path will open for you to follow.",
+    body: "Somewhere in the red maze, three lights still burn against the dark. Find them, paint them with your touch, and the path will open for you to follow.",
   },
   "phase-03": {
     body: "Stars of color call to their twins across the void. Trace three paths, but never cross another hue.",

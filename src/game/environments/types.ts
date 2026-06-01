@@ -46,7 +46,7 @@ export type PhaseRuntimeState = {
   coreOrbTouched: boolean;
   /** phase-02: show hand overlay only near a wall light */
   handOverlayActive: boolean;
-  /** phase-02: wall sphere colors for floating HUD (length 5). */
+  /** phase-02: wall sphere colors for floating HUD (length 3). */
   mazeSphereColors?: number[];
   /** phase-02: 0–1 maze red wash before victory modal. */
   mazeRedWash?: number;

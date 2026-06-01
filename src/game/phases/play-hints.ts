@@ -16,7 +16,7 @@ export const PHASE_PLAY_HINTS: Record<PuzzlePhaseId, PhasePlayHints> = {
     ],
   },
   "phase-02": {
-    objective: "Find the five lights in the maze and turn them all red.",
+    objective: "Find the three lights in the maze and turn them all red.",
     steps: [
       "Walk the labyrinth with keyboard to move and mouse to look around.",
       "The circles above mirror the spheres on the walls.",

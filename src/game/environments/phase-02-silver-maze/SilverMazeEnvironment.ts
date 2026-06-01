@@ -46,7 +46,7 @@ import {
   type UniverseSky,
 } from "./silver-maze-visuals";
 
-const LIGHT_COUNT = 5;
+const LIGHT_COUNT = 3;
 const SPHERE_RADIUS = 0.13;
 /** Center sits just outside the wall inner face so the mesh is visible in corridors. */
 const SPHERE_WALL_OFFSET = WALL_THICK / 2 + SPHERE_RADIUS * 0.42;
@@ -483,7 +483,7 @@ export function createSilverMazeEnvironment(): GameEnvironment {
           : washing
             ? "The maze turns red…"
             : allRed
-              ? "All five lights are red…"
+              ? "All three lights are red…"
               : showSphereHints
                 ? "Follow the beacons — lights still waiting"
                 : touch.touching
