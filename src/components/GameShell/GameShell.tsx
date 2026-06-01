@@ -14,6 +14,7 @@ import { SilverMazeColorHud } from "@/components/SilverMazeColorHud";
 import { PlayControllerHud } from "@/components/PlayControllerHud";
 import { PlayLeftControls, usePlayAssistModalBlocking } from "@/components/PlayLeftControls";
 import { PlayChrome } from "@/components/PlayChrome";
+import { FpsCaptureOverlay } from "@/components/FpsCaptureOverlay";
 import styles from "./GameShell.module.css";
 
 type GameShellProps = {
@@ -55,6 +56,7 @@ export function GameShell({ gameNumber }: GameShellProps) {
       </div>
 
       <PlayUiLayer
+        fps={showGame && isSilverMaze ? <FpsCaptureOverlay /> : null}
         hands={
           showGame &&
           !uiModalBlocking &&

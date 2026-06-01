@@ -32,7 +32,14 @@ export function getFpsLookInput(): FpsInput | null {
   return activeFpsInput;
 }
 
-/** WASD on document; mouse look only while pointer-locked. Click the canvas to capture. */
+function isUiTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof Element)) return true;
+  return (
+    target.closest("[data-play-modal], [data-play-controls], [role='dialog']") !== null
+  );
+}
+
+/** WASD on document; mouse look only while pointer-locked. Click the stage to capture. */
 export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput {
   const keys = new Set<string>();
   let lookDx = 0;
@@ -44,7 +51,9 @@ export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput
 
   const requestLock = () => {
     if (!active || !gameplayEnabled || document.pointerLockElement) return;
-    void lockElement().requestPointerLock();
+    void lockElement().requestPointerLock().catch(() => {
+      /* needs a fresh click on the stage */
+    });
   };
 
   const onKeyDown = (e: KeyboardEvent) => {
@@ -71,6 +80,7 @@ export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput
 
   const onMouseDown = (e: MouseEvent) => {
     if (!active || !gameplayEnabled || e.button !== 0) return;
+    if (isUiTarget(e.target)) return;
     requestLock();
   };
 
@@ -96,6 +106,7 @@ export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput
       window.addEventListener("keydown", onKeyDown);
       window.addEventListener("keyup", onKeyUp);
       document.addEventListener("mousemove", onMouseMove);
+      document.addEventListener("mousedown", onMouseDown);
       pointerLockTarget?.addEventListener("mousedown", onMouseDown);
       document.addEventListener("pointerlockchange", onPointerLockChange);
     },
@@ -104,6 +115,7 @@ export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mousedown", onMouseDown);
       pointerLockTarget?.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("pointerlockchange", onPointerLockChange);
       releaseLock();

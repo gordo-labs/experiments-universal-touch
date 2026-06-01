@@ -2,6 +2,7 @@
 
 import { useCurrentPhaseMeta } from "@/game/react";
 import { PHASE_WELCOME_COPY } from "@/game/phases/phase-welcome-copy";
+import { WasdKeysHint } from "@/components/WasdKeysHint";
 
 type PhaseWelcomeCardProps = {
   onAction: () => void;
@@ -23,6 +24,7 @@ export function PhaseWelcomeCard({
         {phase.title}
       </h2>
       <p className="ts-body">{copy.body}</p>
+      {phase.id === "phase-02" ? <WasdKeysHint /> : null}
       <button type="button" className="ts-cta" onClick={onAction}>
         {actionLabel}
       </button>

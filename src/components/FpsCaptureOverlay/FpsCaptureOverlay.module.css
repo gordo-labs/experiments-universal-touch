@@ -1,0 +1,26 @@
+.overlay {
+  position: fixed;
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: crosshair;
+  background: rgb(0 0 0 / 0.12);
+  border: 1px solid rgb(92 232 255 / 0.22);
+  box-shadow: inset 0 0 40px rgb(92 232 255 / 0.06);
+}
+
+.hint {
+  padding: 0.55rem 1rem;
+  border-radius: 999px;
+  border: 1px solid rgb(92 232 255 / 0.35);
+  background: rgb(8 14 28 / 0.82);
+  backdrop-filter: blur(8px);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ts-cyan, #5ce8ff);
+  box-shadow: 0 0 18px rgb(92 232 255 / 0.12);
+  pointer-events: none;
+}
