@@ -30,6 +30,8 @@ const CORE_CENTER = CORE_ORB_CENTER;
 const PROXIMITY_RADIUS = 0.09;
 const ACTIVATE_LERP = 8;
 const CORE_REVEAL_LERP = 4;
+/** After the core appears, wait before a touch can finish the phase. */
+const CORE_TOUCH_GRACE_SEC = 2;
 
 const SEAL_COLORS = FINGER_NAMES.map((f) => new THREE.Color(FINGER_COLORS[f]));
 
@@ -40,6 +42,8 @@ type SealNode = {
   glow: THREE.Mesh;
   ring: THREE.Mesh;
   activation: number;
+  /** Stays true once a seal is woken by pinch or orb touch. */
+  latched: boolean;
 };
 
 type TipProxy = {
@@ -69,6 +73,8 @@ export function createPhaseOneEnvironment(): GameEnvironment {
   let grid: THREE.Mesh | null = null;
   let fogParticles: THREE.Points | null = null;
   let core: CoreOrb | null = null;
+  let coreVisibleSince: number | null = null;
+  let indexLeftCoreSinceReveal = false;
   const seals: SealNode[] = [];
   const tipProxies: TipProxy[] = [];
   const disposables: THREE.Material[] = [];
@@ -86,11 +92,12 @@ export function createPhaseOneEnvironment(): GameEnvironment {
 
   function allSealsActive(
     interactions: EnvironmentTick["interactions"],
-    sealProximityActive: Partial<Record<FingerName, boolean>>,
+    sealNodes: SealNode[],
   ): boolean {
-    return FINGER_NAMES.every(
-      (f) => interactions[f].active || sealProximityActive[f] === true,
-    );
+    return FINGER_NAMES.every((f) => {
+      const seal = sealNodes.find((node) => node.finger === f);
+      return interactions[f].active || seal?.latched === true;
+    });
   }
 
   function cycleCoreColor(elapsed: number, target: THREE.Color) {
@@ -106,6 +113,8 @@ export function createPhaseOneEnvironment(): GameEnvironment {
 
     mount({ scene }: SceneMount) {
       runtime = { ...EMPTY_PHASE_RUNTIME };
+      coreVisibleSince = null;
+      indexLeftCoreSinceReveal = false;
 
       scene.fog = new THREE.FogExp2(0x030308, 0.38);
 
@@ -269,7 +278,7 @@ export function createPhaseOneEnvironment(): GameEnvironment {
         ring.position.copy(anchor);
         scene.add(ring);
 
-        seals.push({ finger, anchor, orb, glow, ring, activation: 0 });
+        seals.push({ finger, anchor, orb, glow, ring, activation: 0, latched: false });
       }
 
       const positions = new Float32Array(120 * 3);
@@ -332,7 +341,6 @@ export function createPhaseOneEnvironment(): GameEnvironment {
       if (grid) grid.position.y = -0.05 + Math.sin(elapsed * 0.5) * 0.008;
       if (fogParticles) fogParticles.rotation.z = elapsed * 0.03;
 
-      const sealProximityActive: Partial<Record<FingerName, boolean>> = {};
       let portalCharge = 0;
 
       for (const seal of seals) {
@@ -351,14 +359,19 @@ export function createPhaseOneEnvironment(): GameEnvironment {
         }
 
         const touchingSeal = nearest < PROXIMITY_RADIUS;
-        sealProximityActive[seal.finger] = touchingSeal;
 
         const pinchActive = interactions[seal.finger].active;
-        const targetActivation = touchingSeal
-          ? 1 - nearest / PROXIMITY_RADIUS
-          : pinchActive
-            ? 0.65
-            : 0;
+        if (touchingSeal || pinchActive || seal.activation > 0.85) {
+          seal.latched = true;
+        }
+
+        const targetActivation = seal.latched
+          ? 1
+          : touchingSeal
+            ? 1 - nearest / PROXIMITY_RADIUS
+            : pinchActive
+              ? 0.65
+              : 0;
 
         seal.activation += (targetActivation - seal.activation) * Math.min(1, dt * ACTIVATE_LERP);
         portalCharge += seal.activation;
@@ -378,7 +391,7 @@ export function createPhaseOneEnvironment(): GameEnvironment {
         seal.ring.scale.setScalar(1 + a * 0.6);
       }
 
-      const sealsReady = allSealsActive(interactions, sealProximityActive);
+      const sealsReady = allSealsActive(interactions, seals);
 
       if (portal && portalGlow) {
         const charge = Math.min(portalCharge / FINGER_NAMES.length, 1);
@@ -436,12 +449,29 @@ export function createPhaseOneEnvironment(): GameEnvironment {
 
       const coreReveal = core?.reveal ?? 0;
       const coreVisible = sealsReady && coreReveal > 0.15;
+
+      if (coreVisible && coreVisibleSince === null) {
+        coreVisibleSince = elapsed;
+      }
+      if (!coreVisible) {
+        coreVisibleSince = null;
+        indexLeftCoreSinceReveal = false;
+      } else if (!coreTouch.inside) {
+        indexLeftCoreSinceReveal = true;
+      }
+
+      const coreTouchGraceDone =
+        coreVisibleSince !== null && elapsed - coreVisibleSince >= CORE_TOUCH_GRACE_SEC;
+      const coreTouchReady =
+        coreTouchGraceDone && indexLeftCoreSinceReveal && coreTouch.inside;
+
       const coreOrbTouched =
         runtime.coreOrbTouched ||
-        shouldTriggerCoreVictory(coreTouch, sealsReady);
-      const activeSealCount = FINGER_NAMES.filter(
-        (f) => interactions[f].active || sealProximityActive[f] === true,
-      ).length;
+        shouldTriggerCoreVictory({ ...coreTouch, inside: coreTouchReady }, sealsReady);
+      const activeSealCount = FINGER_NAMES.filter((f) => {
+        const seal = seals.find((node) => node.finger === f);
+        return interactions[f].active || seal?.latched === true;
+      }).length;
       const progress = coreOrbTouched
         ? 1
         : sealsReady
@@ -452,9 +482,13 @@ export function createPhaseOneEnvironment(): GameEnvironment {
         progress,
         statusHint: coreOrbTouched
           ? "Core touched"
-          : sealsReady
-            ? "Bring your index finger to the central orb"
-            : `Seals ${activeSealCount}/${FINGER_NAMES.length}`,
+          : coreVisible && !coreTouchGraceDone
+            ? "The core opens — give your hand a moment"
+            : coreVisible && !indexLeftCoreSinceReveal
+              ? "Pull your index back, then touch the core"
+              : sealsReady
+                ? "Bring your index finger to the central orb"
+                : `Seals ${activeSealCount}/${FINGER_NAMES.length}`,
         victoryLatched: runtime.victoryLatched || coreOrbTouched,
         phaseComplete: runtime.phaseComplete || coreOrbTouched,
         allSealsActive: sealsReady,
@@ -492,6 +526,8 @@ export function createPhaseOneEnvironment(): GameEnvironment {
       grid = null;
       fogParticles = null;
       core = null;
+      coreVisibleSince = null;
+      indexLeftCoreSinceReveal = false;
       runtime = { ...EMPTY_PHASE_RUNTIME };
     },
   };

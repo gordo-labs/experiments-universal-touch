@@ -58,7 +58,9 @@ const SPHERE_HINT_AFTER_SEC = 60;
 const HINT_BEACON_HEIGHT = 3.6;
 const HINT_BEACON_RANGE = 28;
 
-const INITIAL_LIGHT_COLORS = FINGER_NAMES.map((f) => FINGER_COLORS[f]);
+const INITIAL_LIGHT_COLORS = FINGER_NAMES.filter((name) => name !== "thumb").map(
+  (f) => FINGER_COLORS[f],
+);
 
 type HintBeacon = {
   group: THREE.Group;
@@ -408,8 +410,10 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       );
       touchPulse = touch.proximity;
 
+      let anySpherePainted = runtime.mazeAnySpherePainted ?? false;
       if (touch.touching && touch.finger != null && touch.lightIndex >= 0 && allRedSince === null) {
         setLightColor(lights[touch.lightIndex], FINGER_COLORS[touch.finger]);
+        anySpherePainted = true;
       }
 
       for (const light of lights) {
@@ -502,6 +506,7 @@ export function createSilverMazeEnvironment(): GameEnvironment {
         handOverlayActive: handsVisible && allRedSince === null,
         mazeSphereColors: sphereColors,
         mazeRedWash: redWash,
+        mazeAnySpherePainted: anySpherePainted,
       };
     },
 

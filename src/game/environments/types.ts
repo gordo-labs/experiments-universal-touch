@@ -50,6 +50,8 @@ export type PhaseRuntimeState = {
   mazeSphereColors?: number[];
   /** phase-02: 0–1 maze red wash before victory modal. */
   mazeRedWash?: number;
+  /** phase-02: player has painted at least one wall sphere. */
+  mazeAnySpherePainted?: boolean;
 };
 
 export const EMPTY_PHASE_RUNTIME: PhaseRuntimeState = {

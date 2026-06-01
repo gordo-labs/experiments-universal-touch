@@ -35,6 +35,11 @@
   color: var(--ts-text-muted, rgb(148 163 184 / 0.95));
 }
 
+.rootCompact {
+  padding: 0.45rem 0.7rem;
+  border-radius: 9999px;
+}
+
 .dot {
   width: 1.35rem;
   height: 1.35rem;

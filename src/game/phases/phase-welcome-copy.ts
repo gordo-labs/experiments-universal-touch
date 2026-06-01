@@ -6,7 +6,7 @@ export type PhaseWelcomeCopy = {
 
 export const PHASE_WELCOME_COPY: Record<PuzzlePhaseId, PhaseWelcomeCopy> = {
   "phase-01": {
-    body: "Five seals hold the threshold closed. Wake each one, then discover what the center becomes.",
+    body: "Five seals hold the threshold closed. Unite the stars at your fingertips to wake each seal, then discover what the center becomes.",
   },
   "phase-02": {
     body: "Somewhere in the red maze, three lights still burn against the dark. Find them, paint them with your touch, and the path will open for you to follow.",
