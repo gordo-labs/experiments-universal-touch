@@ -1,0 +1,62 @@
+.svg {
+  width: min(100%, 18rem);
+  height: auto;
+  margin: 0 auto;
+  display: block;
+  color: var(--ts-cyan);
+  filter: drop-shadow(0 0 10px rgb(92 232 255 / 0.35));
+}
+
+.leftHand,
+.rightHand {
+  animation: handsPulse 2.8s ease-in-out infinite;
+}
+
+.rightHand {
+  animation-delay: 0.4s;
+}
+
+.edge {
+  stroke: currentColor;
+  stroke-width: 1.65;
+  stroke-linecap: round;
+  opacity: 0.92;
+}
+
+.joint {
+  fill: rgb(232 244 255 / 0.95);
+  stroke: currentColor;
+  stroke-width: 1.1;
+}
+
+.tip {
+  fill: currentColor;
+  stroke: rgb(255 255 255 / 0.85);
+  stroke-width: 1;
+  filter: drop-shadow(0 0 4px rgb(92 232 255 / 0.9));
+}
+
+.palmArc {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1;
+  stroke-linecap: round;
+  opacity: 0.35;
+}
+
+.centerLine {
+  stroke: currentColor;
+  stroke-width: 0.75;
+  stroke-dasharray: 2 6;
+  opacity: 0.18;
+}
+
+@keyframes handsPulse {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}

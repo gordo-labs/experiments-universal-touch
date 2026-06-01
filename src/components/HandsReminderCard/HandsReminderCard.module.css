@@ -1,0 +1,21 @@
+.card {
+  composes: ts-card from global;
+  max-width: 22rem;
+}
+
+.eyebrow {
+  composes: ts-eyebrow from global;
+  margin-top: 1rem;
+}
+
+.title {
+  composes: ts-title from global;
+}
+
+.body {
+  composes: ts-body from global;
+}
+
+.cta {
+  composes: ts-cta from global;
+}
