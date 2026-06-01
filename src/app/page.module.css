@@ -1,0 +1,78 @@
+.main {
+  display: flex;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem 1.5rem;
+  background: radial-gradient(ellipse at top, rgb(24 24 27) 0%, rgb(9 9 11) 55%);
+  color: rgb(250 250 250);
+}
+
+.hero {
+  max-width: 36rem;
+  text-align: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(251 191 36);
+}
+
+.title {
+  margin: 0.5rem 0 0;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.lead {
+  margin: 1rem auto 0;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgb(161 161 170);
+}
+
+.cta {
+  display: inline-flex;
+  margin-top: 1.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 0.5rem;
+  background: rgb(79 70 229);
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cta:hover {
+  background: rgb(67 56 202);
+}
+
+.stack {
+  max-width: 36rem;
+  width: 100%;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.08);
+  background: rgb(255 255 255 / 0.03);
+}
+
+.stack h2 {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgb(161 161 170);
+}
+
+.stack ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  color: rgb(212 212 216);
+  line-height: 1.7;
+}

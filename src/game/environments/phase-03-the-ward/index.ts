@@ -1,0 +1,1 @@
+export { createStarMazeEnvironment } from "./StarMazeEnvironment";

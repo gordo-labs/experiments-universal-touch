@@ -1,0 +1,76 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  /* Capture hits on the UI shell; pass-through slots opt out individually. */
+  pointer-events: auto;
+}
+
+.confetti {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.fps {
+  position: absolute;
+  inset: 0;
+  z-index: 15;
+  pointer-events: none;
+}
+
+.fps > * {
+  pointer-events: auto;
+}
+
+.hands {
+  position: absolute;
+  inset: 0;
+  z-index: 40;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.lobby {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  pointer-events: auto;
+}
+
+/* Modals / blocking overlays — always above hands (40) and chrome (20) */
+.implosion {
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  pointer-events: auto;
+}
+
+.victory {
+  position: absolute;
+  inset: 0;
+  z-index: 75;
+  pointer-events: auto;
+}
+
+.finale {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  pointer-events: auto;
+}
+
+.chrome {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+}
+
+.hud {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  pointer-events: none;
+}
