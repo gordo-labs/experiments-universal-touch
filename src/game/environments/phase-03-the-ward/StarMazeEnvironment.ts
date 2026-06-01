@@ -271,7 +271,7 @@ export function createStarMazeEnvironment(): GameEnvironment {
     lastTouchAt = -1e9;
     lastTouchId = null;
     invalidFlash = 0;
-    runtime = { ...EMPTY_PHASE_RUNTIME, statusHint: "Toca una estrella de color izquierda con el índice" };
+    runtime = { ...EMPTY_PHASE_RUNTIME, statusHint: "Touch a colored star on the left with your index finger" };
   }
 
   function segmentWouldCrossOtherColor(
@@ -318,7 +318,7 @@ export function createStarMazeEnvironment(): GameEnvironment {
       invalidFlash = 1;
       runtime = {
         ...runtime,
-        statusHint: "Ese rayo se cruza consigo mismo — busca otra estrella",
+        statusHint: "That beam crosses itself. Try another star",
       };
       return;
     }
@@ -327,7 +327,7 @@ export function createStarMazeEnvironment(): GameEnvironment {
       invalidFlash = 1;
       runtime = {
         ...runtime,
-        statusHint: "Ese rayo cruza otro color — busca otra estrella",
+        statusHint: "That beam crosses another color. Try another star",
       };
       return;
     }
@@ -556,7 +556,7 @@ export function createStarMazeEnvironment(): GameEnvironment {
       paths = emptyPaths(sourceIds, STAR_MAZE_FINGERS);
       runtime = {
         ...EMPTY_PHASE_RUNTIME,
-        statusHint: "Toca una estrella de color izquierda con el índice derecho",
+        statusHint: "Touch a colored star on the left with your right index",
         handOverlayActive: true,
       };
 
@@ -617,12 +617,12 @@ export function createStarMazeEnvironment(): GameEnvironment {
       runtime = {
         progress: complete ? 1 : doneCount / colorTotal,
         statusHint: complete
-          ? "Constelación conectada"
+          ? "Constellation connected"
           : activeFinger
-            ? `${activeFinger}: toca otra estrella sin cruzar otros colores`
+            ? `${activeFinger}: touch another star without crossing other colors`
             : doneCount > 0
-              ? `Conexiones ${doneCount}/${colorTotal} — elige otra estrella izquierda`
-              : "Toca una estrella de color izquierda con el índice",
+              ? `Connections ${doneCount}/${colorTotal}. Pick another left star`
+              : "Touch a colored star on the left with your index finger",
         victoryLatched: runtime.victoryLatched || complete,
         phaseComplete: runtime.phaseComplete || complete,
         allSealsActive: complete,

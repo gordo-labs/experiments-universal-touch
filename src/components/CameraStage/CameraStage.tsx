@@ -48,7 +48,7 @@ export function CameraStage({ children }: CameraStageProps) {
         if (!isAbort && !cancelled) {
           setStatus(
             "error",
-            err instanceof Error ? err.message : "Video play failed",
+            err instanceof Error ? err.message : "Could not play video",
           );
         }
       }

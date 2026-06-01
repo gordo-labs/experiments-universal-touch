@@ -1,1 +1,5 @@
-export { EscapeFinaleScreen } from "./EscapeFinaleScreen";
+export {
+  EscapeFinaleScreen,
+  setFinaleReplayFlag,
+  consumeFinaleReplayFlag,
+} from "./EscapeFinaleScreen";

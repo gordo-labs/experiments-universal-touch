@@ -1,16 +1,15 @@
 "use client";
 
 import { useCamera, useHandTracking } from "@/modules/hand-engine";
-import { useGameSession, useCurrentPhaseMeta } from "@/game/react";
-import bannerStyles from "@/components/PlayBanner/PlayBanner.module.css";
+import { useGameSession } from "@/game/react";
+import { PhaseWelcomeCard } from "@/components/PhaseWelcomeCard";
 
 type LobbyBannerProps = {
   gameNumber?: number;
 };
 
-export function LobbyBanner({ gameNumber }: LobbyBannerProps) {
-  const { sessionStatus, startSession } = useGameSession();
-  const phase = useCurrentPhaseMeta();
+export function LobbyBanner(_props: LobbyBannerProps) {
+  const { sessionStatus, enterGameFromLobby } = useGameSession();
   const { status: cameraStatus, error: cameraError } = useCamera();
   const { status: trackingStatus, error: trackingError } = useHandTracking();
 
@@ -26,36 +25,22 @@ export function LobbyBanner({ gameNumber }: LobbyBannerProps) {
       trackingStatus === "loading-model");
 
   return (
-    <div className={bannerStyles.backdrop} role="dialog" aria-modal="true">
-      <div className={bannerStyles.card}>
-        {error ? (
-          <>
-            <p className={bannerStyles.errorTitle}>No se puede iniciar</p>
-            <p className={bannerStyles.errorBody}>{error}</p>
-            <p className={bannerStyles.hint}>
-              Necesitas HTTPS o localhost y permiso de cámara.
-            </p>
-          </>
-        ) : loading ? (
-          <p className={bannerStyles.loading}>
-            {trackingStatus === "loading-model"
-              ? "Cargando modelo de manos…"
-              : "Iniciando cámara…"}
+    <div className="ts-backdrop ts-backdropHeavy" role="dialog" aria-modal="true">
+      {error ? (
+        <div className="ts-card">
+          <p className="ts-errorTitle">Cannot start</p>
+          <p className="ts-errorBody">{error}</p>
+          <p className="ts-hint">
+            Allow camera access in your browser settings and try again.
           </p>
-        ) : (
-          <>
-            {gameNumber != null && (
-              <p className={bannerStyles.hint}>/play/{gameNumber}</p>
-            )}
-            <p className={bannerStyles.eyebrow}>{phase.gameLabel}</p>
-            <h2 className={bannerStyles.title}>{phase.title}</h2>
-            <p className={bannerStyles.subtitle}>{phase.subtitle}</p>
-            <button type="button" className={bannerStyles.cta} onClick={startSession}>
-              Start {phase.gameLabel}
-            </button>
-          </>
-        )}
-      </div>
+        </div>
+      ) : loading ? (
+        <div className="ts-card">
+          <p className="ts-loading">Getting ready…</p>
+        </div>
+      ) : (
+        <PhaseWelcomeCard onAction={enterGameFromLobby} />
+      )}
     </div>
   );
 }

@@ -1,0 +1,20 @@
+import type { PuzzlePhaseId } from "./types";
+
+export type PhaseWelcomeCopy = {
+  body: string;
+};
+
+export const PHASE_WELCOME_COPY: Record<PuzzlePhaseId, PhaseWelcomeCopy> = {
+  "phase-01": {
+    body: "Five seals hold the threshold closed. Wake each one, then discover what the center becomes.",
+  },
+  "phase-02": {
+    body: "Somewhere in the red maze, five lights still burn. Find them, paint them, and you will be able to follow.",
+  },
+  "phase-03": {
+    body: "Stars of color call to their twins across the void. Trace three paths, but never cross another hue.",
+  },
+  "phase-04": {
+    body: "Loose stars drift between empty rings. Set them all spinning, then close the portal at the heart.",
+  },
+};

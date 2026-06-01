@@ -13,6 +13,7 @@ import {
   collectInnerWallSlots,
   generateMaze,
   pickRandomSlots,
+  pickSpreadWallSlots,
   spawnCell,
   WALL_HEIGHT,
   WALL_THICK,
@@ -32,10 +33,26 @@ import {
   findLightFingerTouch,
   isThumbRed,
 } from "./light-touch";
+import {
+  addWallTronEdges,
+  applyTronRedWash,
+  applyMazeSceneEnvironment,
+  configureTronPointLightShadow,
+  createTronSurfaceMaterial,
+  createUniverseSky,
+  createWallEdgeMaterial,
+  enableMazeShadows,
+  type MazeSceneLighting,
+  type UniverseSky,
+} from "./silver-maze-visuals";
 
 const LIGHT_COUNT = 5;
 const SPHERE_RADIUS = 0.13;
-const EMBED = 0.06;
+/** Center sits just outside the wall inner face so the mesh is visible in corridors. */
+const SPHERE_WALL_OFFSET = WALL_THICK / 2 + SPHERE_RADIUS * 0.42;
+const LIGHT_MIN_SPACING = CELL_SIZE * 2.8;
+const ALL_RED_PAUSE_SEC = 2.5;
+const RED_WASH_DURATION_SEC = 3;
 
 const INITIAL_LIGHT_COLORS = FINGER_NAMES.map((f) => FINGER_COLORS[f]);
 
@@ -49,14 +66,17 @@ type LightEmitter = {
   pulse: number;
 };
 
-function silverMaterial(): THREE.MeshPhysicalMaterial {
+function createLightSphereMaterial(initialColor: number): THREE.MeshPhysicalMaterial {
   return new THREE.MeshPhysicalMaterial({
-    color: 0xd4dce8,
-    metalness: 0.95,
-    roughness: 0.22,
-    reflectivity: 1,
-    clearcoat: 0.35,
-    clearcoatRoughness: 0.15,
+    color: initialColor,
+    emissive: new THREE.Color(initialColor),
+    emissiveIntensity: 1.1,
+    metalness: 0.75,
+    roughness: 0.12,
+    clearcoat: 0.85,
+    clearcoatRoughness: 0.08,
+    transparent: true,
+    opacity: 0.96,
   });
 }
 
@@ -74,6 +94,15 @@ export function createSilverMazeEnvironment(): GameEnvironment {
   const geometries: THREE.BufferGeometry[] = [];
   const lights: LightEmitter[] = [];
   let mazeGroup: THREE.Group | null = null;
+  let universeSky: UniverseSky | null = null;
+  let sceneLighting: MazeSceneLighting | null = null;
+  let prevToneMapping: THREE.ToneMapping = THREE.NoToneMapping;
+  let prevToneExposure = 1;
+  let prevShadowEnabled = false;
+  let mountRenderer: THREE.WebGLRenderer | null = null;
+  let tronSurface: THREE.MeshPhysicalMaterial | null = null;
+  let tronEdgeMaterial: THREE.LineBasicMaterial | null = null;
+  let allRedSince: number | null = null;
 
   function track<T extends THREE.Material>(mat: T): T {
     disposables.push(mat);
@@ -91,30 +120,26 @@ export function createSilverMazeEnvironment(): GameEnvironment {
 
     const floorW = grid.cols * CELL_SIZE;
     const floorD = grid.rows * CELL_SIZE;
-    const silver = track(silverMaterial());
-    const floorSilver = track(
-      silverMaterial().clone() as THREE.MeshPhysicalMaterial,
-    );
-    floorSilver.roughness = 0.38;
+    const tronSurfaceMat = track(createTronSurfaceMaterial());
+    tronSurface = tronSurfaceMat;
+    const edgeMaterial = track(createWallEdgeMaterial());
+    tronEdgeMaterial = edgeMaterial;
+
+    const addWall = (wall: THREE.Mesh) => {
+      wall.castShadow = true;
+      wall.receiveShadow = true;
+      mazeGroup!.add(wall);
+      addWallTronEdges(wall, mazeGroup!, edgeMaterial, trackGeo);
+    };
 
     const floor = new THREE.Mesh(
       trackGeo(new THREE.PlaneGeometry(floorW, floorD)),
-      floorSilver,
+      tronSurfaceMat,
     );
     floor.rotation.x = -Math.PI / 2;
+    floor.receiveShadow = true;
     mazeGroup.add(floor);
-
-    const ceilMat = track(
-      silverMaterial().clone() as THREE.MeshPhysicalMaterial,
-    );
-    ceilMat.color.setHex(0xa8b0bc);
-    const ceil = new THREE.Mesh(
-      trackGeo(new THREE.PlaneGeometry(floorW, floorD)),
-      ceilMat,
-    );
-    ceil.rotation.x = Math.PI / 2;
-    ceil.position.y = WALL_HEIGHT;
-    mazeGroup.add(ceil);
+    addWallTronEdges(floor, mazeGroup, edgeMaterial, trackGeo);
 
     for (let r = 0; r <= grid.rows; r++) {
       for (let c = 0; c < grid.cols; c++) {
@@ -123,10 +148,10 @@ export function createSilverMazeEnvironment(): GameEnvironment {
         const z = (r - grid.rows / 2) * CELL_SIZE;
         const wall = new THREE.Mesh(
           trackGeo(new THREE.BoxGeometry(CELL_SIZE, WALL_HEIGHT, WALL_THICK)),
-          silver,
+          tronSurfaceMat,
         );
         wall.position.set(x, WALL_HEIGHT / 2, z);
-        mazeGroup.add(wall);
+        addWall(wall);
       }
     }
 
@@ -137,38 +162,28 @@ export function createSilverMazeEnvironment(): GameEnvironment {
         const z = (r + 0.5 - grid.rows / 2) * CELL_SIZE;
         const wall = new THREE.Mesh(
           trackGeo(new THREE.BoxGeometry(WALL_THICK, WALL_HEIGHT, CELL_SIZE)),
-          silver,
+          tronSurfaceMat,
         );
         wall.position.set(x, WALL_HEIGHT / 2, z);
-        mazeGroup.add(wall);
+        addWall(wall);
       }
     }
   }
 
   function createLightEmitter(slot: WallSlot, initialColor: number): LightEmitter {
     const y = WALL_HEIGHT * 0.5;
-    const inset = SPHERE_RADIUS - EMBED;
     const world = new THREE.Vector3(
-      slot.x + slot.nx * inset,
+      slot.x + slot.nx * SPHERE_WALL_OFFSET,
       y,
-      slot.z + slot.nz * inset,
+      slot.z + slot.nz * SPHERE_WALL_OFFSET,
     );
 
     const mesh = new THREE.Mesh(
       trackGeo(new THREE.SphereGeometry(SPHERE_RADIUS, 24, 24)),
-      track(
-        new THREE.MeshPhysicalMaterial({
-          color: initialColor,
-          emissive: new THREE.Color(initialColor),
-          emissiveIntensity: 0.9,
-          metalness: 0.85,
-          roughness: 0.15,
-          transparent: true,
-          opacity: 0.95,
-        }),
-      ),
+      track(createLightSphereMaterial(initialColor)),
     );
     mesh.position.copy(world);
+    mesh.renderOrder = 5;
 
     const glow = new THREE.Mesh(
       trackGeo(new THREE.SphereGeometry(SPHERE_RADIUS * 2.2, 16, 16)),
@@ -183,9 +198,11 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       ),
     );
     glow.position.copy(world);
+    glow.renderOrder = 4;
 
     const point = new THREE.PointLight(initialColor, 0.85, 7, 1.6);
     point.position.copy(world);
+    configureTronPointLightShadow(point);
 
     return { slot, world, mesh, glow, point, color: initialColor, pulse: 0 };
   }
@@ -206,12 +223,15 @@ export function createSilverMazeEnvironment(): GameEnvironment {
   return {
     id,
 
-    mount({ scene, camera }: SceneMount) {
+    mount({ scene, camera, canvas, renderer }: SceneMount) {
       runtime = { ...EMPTY_PHASE_RUNTIME };
       touchPulse = 0;
       lights.length = 0;
+      allRedSince = null;
+      tronSurface = null;
+      tronEdgeMaterial = null;
 
-      fpsInput = createFpsInput();
+      fpsInput = createFpsInput(canvas ?? undefined);
       fpsInput.attach();
       registerFpsLookInput(fpsInput);
 
@@ -229,19 +249,41 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       camera.far = 80;
       camera.updateProjectionMatrix();
 
-      scene.fog = new THREE.FogExp2(0x121820, 0.038);
-      scene.background = new THREE.Color(0x121820);
+      scene.fog = new THREE.FogExp2(0x060a14, 0.028);
+      scene.background = new THREE.Color(0x060a14);
 
-      scene.add(new THREE.AmbientLight(0xaabbcc, 0.45));
-      const hemi = new THREE.HemisphereLight(0xd0dce8, 0x303840, 0.65);
+      scene.add(new THREE.AmbientLight(0x8899aa, 0.32));
+      const hemi = new THREE.HemisphereLight(0x6a8fd4, 0x1a2230, 0.85);
+      hemi.position.set(0, 40, 0);
       scene.add(hemi);
-      const fill = new THREE.DirectionalLight(0xc8d4e0, 0.35);
-      fill.position.set(0, 8, 4);
+      const universe = new THREE.DirectionalLight(0x9ec4ff, 0.55);
+      universe.position.set(0, 24, 2);
+      scene.add(universe);
+      const fill = new THREE.DirectionalLight(0xc8d4e0, 0.22);
+      fill.position.set(-6, 5, 8);
       scene.add(fill);
+
+      if (renderer) {
+        mountRenderer = renderer;
+        prevToneMapping = renderer.toneMapping;
+        prevToneExposure = renderer.toneMappingExposure;
+        prevShadowEnabled = renderer.shadowMap.enabled;
+        enableMazeShadows(renderer);
+        sceneLighting = applyMazeSceneEnvironment(scene, renderer);
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.05;
+      }
+
+      universeSky = createUniverseSky(track, trackGeo);
+      scene.add(universeSky.group);
 
       buildMazeGeometry(scene, maze);
 
-      const slots = pickRandomSlots(collectInnerWallSlots(maze), LIGHT_COUNT);
+      const slots = pickSpreadWallSlots(
+        collectInnerWallSlots(maze),
+        LIGHT_COUNT,
+        LIGHT_MIN_SPACING,
+      );
       const shuffledColors = pickRandomSlots([...INITIAL_LIGHT_COLORS], LIGHT_COUNT);
       slots.forEach((slot, i) => {
         const emitter = createLightEmitter(slot, shuffledColors[i] ?? INITIAL_LIGHT_COLORS[i]);
@@ -258,8 +300,14 @@ export function createSilverMazeEnvironment(): GameEnvironment {
     tick({ fingers, dt, elapsed, camera }: EnvironmentTick) {
       if (disposed || !maze || !fpsInput) return;
 
-      tickFpsMovement(player, maze, fpsInput, dt);
+      const gameplayPaused = runtime.victoryLatched;
+      fpsInput.setGameplayEnabled(!gameplayPaused);
+
+      if (!gameplayPaused) {
+        tickFpsMovement(player, maze, fpsInput, dt);
+      }
       applyFpsCamera(camera, player);
+      universeSky?.follow(player.x, player.z);
 
       const handsVisible = fingers.left.detected || fingers.right.detected;
       const touch = findLightFingerTouch(
@@ -270,7 +318,7 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       );
       touchPulse = touch.proximity;
 
-      if (touch.touching && touch.finger != null && touch.lightIndex >= 0) {
+      if (touch.touching && touch.finger != null && touch.lightIndex >= 0 && allRedSince === null) {
         setLightColor(lights[touch.lightIndex], FINGER_COLORS[touch.finger]);
       }
 
@@ -286,27 +334,56 @@ export function createSilverMazeEnvironment(): GameEnvironment {
           (isThumbRed(light.color) ? 0.35 : 0.22) + pulseBoost;
       }
 
-      const redCount = lights.filter((l) => isThumbRed(l.color)).length;
-      const complete = allLightsRed(lights.map((l) => l.color));
+      const sphereColors = lights.map((l) => l.color);
+      const redCount = sphereColors.filter((c) => isThumbRed(c)).length;
+      const allRed = allLightsRed(sphereColors);
+      let redWash = runtime.mazeRedWash ?? 0;
+      let victoryLatched = runtime.victoryLatched;
+
+      if (allRed) {
+        if (allRedSince === null) allRedSince = elapsed;
+        const sinceAllRed = elapsed - allRedSince;
+        if (sinceAllRed >= ALL_RED_PAUSE_SEC && tronSurface && tronEdgeMaterial) {
+          const linear = Math.min(
+            1,
+            (sinceAllRed - ALL_RED_PAUSE_SEC) / RED_WASH_DURATION_SEC,
+          );
+          redWash = linear * linear * (3 - 2 * linear);
+          applyTronRedWash(tronSurface, tronEdgeMaterial, redWash);
+          if (redWash >= 1) victoryLatched = true;
+        }
+      } else {
+        allRedSince = null;
+        redWash = 0;
+      }
+
+      const sinceAllRed = allRedSince !== null ? elapsed - allRedSince : 0;
+      const washing = allRed && sinceAllRed >= ALL_RED_PAUSE_SEC && redWash < 1;
 
       runtime = {
-        progress: complete ? 1 : redCount / LIGHT_COUNT,
-        statusHint: complete
-          ? "Las cinco luces están rojas"
-          : touch.touching
-            ? "Color aplicado — pulgar = rojo para victoria"
-            : handsVisible
-              ? "Toca la esfera en pantalla con el dedo del color"
-              : "WASD · ratón · acerca las manos para pintar las esferas",
-        victoryLatched: runtime.victoryLatched || complete,
-        phaseComplete: runtime.phaseComplete || complete,
-        allSealsActive: complete,
+        progress: allRed ? 1 : redCount / LIGHT_COUNT,
+        statusHint: victoryLatched
+          ? "The maze burns red"
+          : washing
+            ? "The maze turns red…"
+            : allRed
+              ? "All five lights are red…"
+              : touch.touching
+                ? "Color applied. Thumb = red to win"
+                : handsVisible
+                  ? "Touch the on-screen sphere with the finger color you want"
+                  : "WASD · mouse · bring your hands close to paint the spheres",
+        victoryLatched,
+        phaseComplete: victoryLatched,
+        allSealsActive: allRed,
         coreOrbVisible: false,
         coreOrbReveal: redCount / LIGHT_COUNT,
         indexCoreProximity: touchPulse,
         fingersInCore: redCount,
-        coreOrbTouched: complete,
-        handOverlayActive: handsVisible,
+        coreOrbTouched: victoryLatched,
+        handOverlayActive: handsVisible && allRedSince === null,
+        mazeSphereColors: sphereColors,
+        mazeRedWash: redWash,
       };
     },
 
@@ -321,6 +398,16 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       registerFpsLookInput(null);
       if (mazeGroup?.parent) mazeGroup.parent.remove(mazeGroup);
       mazeGroup = null;
+      universeSky?.dispose();
+      universeSky = null;
+      sceneLighting?.dispose();
+      sceneLighting = null;
+      if (mountRenderer) {
+        mountRenderer.toneMapping = prevToneMapping;
+        mountRenderer.toneMappingExposure = prevToneExposure;
+        mountRenderer.shadowMap.enabled = prevShadowEnabled;
+        mountRenderer = null;
+      }
       for (const light of lights) {
         light.mesh.parent?.remove(light.mesh);
         light.glow.parent?.remove(light.glow);
@@ -331,6 +418,9 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       for (const mat of disposables) mat.dispose();
       geometries.length = 0;
       disposables.length = 0;
+      tronSurface = null;
+      tronEdgeMaterial = null;
+      allRedSince = null;
       maze = null;
       runtime = { ...EMPTY_PHASE_RUNTIME };
     },

@@ -44,11 +44,16 @@ type GameSessionContextValue = {
   completedPhases: PuzzlePhaseId[];
   fingerInteractions: Record<FingerName, FingerInteractionState>;
   victoryPanelOpen: boolean;
-  /** Wall-clock start of the active puzzle (null while victory modal is open). */
+  /** Per-game intro modal — timer paused until dismissed. */
+  welcomeOpen: boolean;
+  /** Wall-clock start of the active puzzle (null while welcome or victory modal is open). */
   phaseStartedAt: number | null;
   /** Completed puzzle durations in milliseconds. */
   phaseTimes: Partial<Record<PuzzlePhaseId, number>>;
   startSession: () => void;
+  /** Enter from lobby after welcome card — scene starts, timer runs. */
+  enterGameFromLobby: () => void;
+  dismissWelcome: () => void;
   endSession: () => void;
   /** Continue to next puzzle after phase victory modal. */
   advancePhase: () => void;
@@ -119,6 +124,7 @@ export function GameSessionProvider({
   const [completedPhases, setCompletedPhases] = useState<PuzzlePhaseId[]>([]);
   const [fingerInteractions, setFingerInteractions] = useState(initialInteractions);
   const [victoryPanelOpen, setVictoryPanelOpen] = useState(false);
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
   const [phaseStartedAt, setPhaseStartedAt] = useState<number | null>(null);
   const [phaseTimes, setPhaseTimes] = useState<Partial<Record<PuzzlePhaseId, number>>>({});
 
@@ -137,8 +143,9 @@ export function GameSessionProvider({
 
   const resetCurrentPhase = useCallback(() => {
     setVictoryPanelOpen(false);
+    setWelcomeOpen(true);
     setFingerInteractions(initialInteractions());
-    setPhaseStartedAt(performance.now());
+    setPhaseStartedAt(null);
     setPhaseTimes((prev) => {
       const next = { ...prev };
       delete next[currentPhaseId];
@@ -146,6 +153,20 @@ export function GameSessionProvider({
     });
     dispatchPhaseReset(currentPhaseId);
   }, [currentPhaseId]);
+
+  const dismissWelcome = useCallback(() => {
+    setWelcomeOpen(false);
+    setPhaseStartedAt((started) => started ?? performance.now());
+  }, []);
+
+  const enterGameFromLobby = useCallback(() => {
+    setSessionId((id) => id ?? crypto.randomUUID());
+    setSessionStatus("playing");
+    setVictoryPanelOpen(false);
+    setWelcomeOpen(false);
+    setPhaseStartedAt(performance.now());
+    setFingerInteractions(initialInteractions());
+  }, []);
 
   const startSession = useCallback(() => {
     setSessionId(crypto.randomUUID());
@@ -155,19 +176,22 @@ export function GameSessionProvider({
     setFingerInteractions(initialInteractions());
     setVictoryPanelOpen(false);
     setPhaseTimes({});
-    setPhaseStartedAt(performance.now());
+    setWelcomeOpen(true);
+    setPhaseStartedAt(null);
   }, [initialPhaseId]);
 
   const endSession = useCallback(() => {
     setSessionStatus("ended");
     setSessionId(null);
     setVictoryPanelOpen(false);
+    setWelcomeOpen(false);
     setPhaseStartedAt(null);
   }, []);
 
   const advancePhase = useCallback(() => {
     setVictoryPanelOpen(false);
-    setPhaseStartedAt(performance.now());
+    setWelcomeOpen(true);
+    setPhaseStartedAt(null);
     setCurrentPhaseId((current) => {
       const next = nextPhaseId(current);
       if (!next) return current;
@@ -209,9 +233,12 @@ export function GameSessionProvider({
       completedPhases,
       fingerInteractions,
       victoryPanelOpen,
+      welcomeOpen,
       phaseStartedAt,
       phaseTimes,
       startSession,
+      enterGameFromLobby,
+      dismissWelcome,
       endSession,
       advancePhase,
       completeEscape,
@@ -229,9 +256,12 @@ export function GameSessionProvider({
       completedPhases,
       fingerInteractions,
       victoryPanelOpen,
+      welcomeOpen,
       phaseStartedAt,
       phaseTimes,
       startSession,
+      enterGameFromLobby,
+      dismissWelcome,
       endSession,
       advancePhase,
       completeEscape,

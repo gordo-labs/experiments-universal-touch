@@ -126,3 +126,34 @@ export function pickRandomSlots<T>(items: T[], count: number): T[] {
   }
   return picked;
 }
+
+function slotDistance(a: WallSlot, b: WallSlot): number {
+  return Math.hypot(a.x - b.x, a.z - b.z);
+}
+
+/** Pick wall slots spread across the maze (avoids clusters on the same wall). */
+export function pickSpreadWallSlots(
+  slots: WallSlot[],
+  count: number,
+  minDist: number,
+): WallSlot[] {
+  const shuffled = pickRandomSlots(slots, slots.length);
+  const picked: WallSlot[] = [];
+
+  for (const slot of shuffled) {
+    if (picked.length >= count) break;
+    const crowded = picked.some((existing) => slotDistance(existing, slot) < minDist);
+    if (crowded) continue;
+    picked.push(slot);
+  }
+
+  if (picked.length < count) {
+    for (const slot of shuffled) {
+      if (picked.length >= count) break;
+      if (picked.includes(slot)) continue;
+      picked.push(slot);
+    }
+  }
+
+  return picked;
+}

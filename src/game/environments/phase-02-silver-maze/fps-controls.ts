@@ -17,6 +17,7 @@ export type PlayerState = {
 export type FpsInput = {
   attach: () => void;
   detach: () => void;
+  setGameplayEnabled: (enabled: boolean) => void;
   isDown: (code: string) => boolean;
   consumeLookDelta: () => { dx: number; dy: number };
 };
@@ -31,17 +32,23 @@ export function getFpsLookInput(): FpsInput | null {
   return activeFpsInput;
 }
 
-/** Document-level WASD + continuous mouse look (no pointer-lock required). */
-export function createFpsInput(): FpsInput {
+/** WASD on document; mouse look only while pointer-locked. Click the canvas to capture. */
+export function createFpsInput(pointerLockTarget?: HTMLElement | null): FpsInput {
   const keys = new Set<string>();
   let lookDx = 0;
   let lookDy = 0;
   let active = false;
-  let lastClientX: number | null = null;
-  let lastClientY: number | null = null;
+  let gameplayEnabled = true;
+
+  const lockElement = () => pointerLockTarget ?? document.body;
+
+  const requestLock = () => {
+    if (!active || !gameplayEnabled || document.pointerLockElement) return;
+    void lockElement().requestPointerLock();
+  };
 
   const onKeyDown = (e: KeyboardEvent) => {
-    if (!active) return;
+    if (!active || !gameplayEnabled) return;
     keys.add(e.code);
     if (
       ["KeyW", "KeyA", "KeyS", "KeyD", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(
@@ -57,31 +64,29 @@ export function createFpsInput(): FpsInput {
   };
 
   const onMouseMove = (e: MouseEvent) => {
-    if (!active) return;
-    if (document.pointerLockElement) {
-      lookDx += e.movementX;
-      lookDy += e.movementY;
-      return;
-    }
-    if (lastClientX !== null && lastClientY !== null) {
-      lookDx += e.clientX - lastClientX;
-      lookDy += e.clientY - lastClientY;
-    }
-    lastClientX = e.clientX;
-    lastClientY = e.clientY;
+    if (!active || !gameplayEnabled || !document.pointerLockElement) return;
+    lookDx += e.movementX;
+    lookDy += e.movementY;
   };
 
-  const onMouseDown = () => {
-    if (!active) return;
-    if (!document.pointerLockElement) {
-      void document.body.requestPointerLock();
-    }
+  const onMouseDown = (e: MouseEvent) => {
+    if (!active || !gameplayEnabled || e.button !== 0) return;
+    requestLock();
   };
 
   const onPointerLockChange = () => {
     if (!document.pointerLockElement) {
-      lastClientX = null;
-      lastClientY = null;
+      lookDx = 0;
+      lookDy = 0;
+    }
+  };
+
+  const releaseLock = () => {
+    if (!document.pointerLockElement) return;
+    try {
+      document.exitPointerLock();
+    } catch {
+      /* ignore */
     }
   };
 
@@ -91,7 +96,7 @@ export function createFpsInput(): FpsInput {
       window.addEventListener("keydown", onKeyDown);
       window.addEventListener("keyup", onKeyUp);
       document.addEventListener("mousemove", onMouseMove);
-      document.addEventListener("mousedown", onMouseDown);
+      pointerLockTarget?.addEventListener("mousedown", onMouseDown);
       document.addEventListener("pointerlockchange", onPointerLockChange);
     },
     detach() {
@@ -99,14 +104,21 @@ export function createFpsInput(): FpsInput {
       window.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("keyup", onKeyUp);
       document.removeEventListener("mousemove", onMouseMove);
-      document.removeEventListener("mousedown", onMouseDown);
+      pointerLockTarget?.removeEventListener("mousedown", onMouseDown);
       document.removeEventListener("pointerlockchange", onPointerLockChange);
-      if (document.pointerLockElement) document.exitPointerLock();
+      releaseLock();
       keys.clear();
       lookDx = 0;
       lookDy = 0;
-      lastClientX = null;
-      lastClientY = null;
+    },
+    setGameplayEnabled(enabled) {
+      gameplayEnabled = enabled;
+      if (!enabled) {
+        releaseLock();
+        keys.clear();
+        lookDx = 0;
+        lookDy = 0;
+      }
     },
     isDown(code) {
       return keys.has(code);

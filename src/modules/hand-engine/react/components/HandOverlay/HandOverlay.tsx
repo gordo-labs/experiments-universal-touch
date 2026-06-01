@@ -5,7 +5,7 @@ import { HandLandmarker } from "@mediapipe/tasks-vision";
 import { useCamera } from "../../contexts/CameraContext";
 import { useHandTracking } from "../../contexts/HandTrackingContext";
 import { useFingersStore } from "../../contexts/FingersContext";
-import { FINGER_COLORS, FINGER_NAMES } from "../../../core/constants";
+import { FINGER_COLORS, FINGER_NAMES, OVERLAY_WIRE_FILL, OVERLAY_WIRE_GLOW, OVERLAY_WIRE_STROKE } from "../../../core/constants";
 import styles from "./HandOverlay.module.css";
 
 type HandOverlayProps = {
@@ -87,15 +87,15 @@ export function HandOverlay({
         const x = point.x * cssW;
         const y = point.y * cssH;
         ctx.save();
-        ctx.shadowColor = "rgba(255,255,255,0.9)";
-        ctx.shadowBlur = 12;
-        ctx.strokeStyle = "rgba(255,255,255,0.92)";
+        ctx.shadowColor = OVERLAY_WIRE_GLOW;
+        ctx.shadowBlur = 14;
+        ctx.strokeStyle = OVERLAY_WIRE_STROKE;
         ctx.lineWidth = 2.6;
         ctx.beginPath();
         ctx.arc(x, y, 12, 0, Math.PI * 2);
         ctx.stroke();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = "rgba(255,255,255,0.16)";
+        ctx.fillStyle = "rgba(92, 232, 255, 0.18)";
         ctx.beginPath();
         ctx.arc(x, y, 5, 0, Math.PI * 2);
         ctx.fill();
@@ -157,9 +157,9 @@ export function HandOverlay({
         const cat = result.handedness?.[i]?.[0]?.categoryName;
         const lm = result.landmarks[i];
         if (cat === "Left") {
-          drawHand(lm, "rgba(34,211,238,0.85)", "rgba(34,211,238,0.95)", "left");
+          drawHand(lm, OVERLAY_WIRE_STROKE, OVERLAY_WIRE_FILL, "left");
         } else if (cat === "Right") {
-          drawHand(lm, "rgba(244,114,182,0.85)", "rgba(244,114,182,0.95)", "right");
+          drawHand(lm, OVERLAY_WIRE_STROKE, OVERLAY_WIRE_FILL, "right");
         }
       }
     };

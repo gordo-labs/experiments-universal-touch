@@ -111,7 +111,7 @@ export function GameSceneHost() {
       resetPhaseRuntime(runtimeStore);
 
       const env = createEnvironmentForPhase(phaseId);
-      env.mount({ scene, camera, canvas: renderer.domElement });
+      env.mount({ scene, camera, canvas: renderer.domElement, renderer });
       envRef.current = env;
     };
 

@@ -1,0 +1,37 @@
+.root {
+  pointer-events: none;
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ts-cyan-border);
+  background: rgb(8 14 28 / 0.72);
+  backdrop-filter: blur(10px);
+  box-shadow:
+    0 0 20px var(--ts-cyan-glow),
+    0 8px 28px rgb(0 0 0 / 0.35);
+}
+
+.dot {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: 9999px;
+  border: 2px solid rgb(255 255 255 / 0.35);
+  box-shadow:
+    0 0 12px color-mix(in srgb, var(--dot-color) 55%, transparent),
+    inset 0 0 8px rgb(255 255 255 / 0.18);
+  transition:
+    background-color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s ease;
+}
+
+.dotActive {
+  transform: scale(1.08);
+  border-color: rgb(255 255 255 / 0.75);
+}

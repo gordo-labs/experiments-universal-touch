@@ -51,7 +51,7 @@ export function HandTrackingProvider({ children }: { children: ReactNode }) {
       } catch (e) {
         if (cancelled) return;
         setStatus("error");
-        setError(e instanceof Error ? e.message : "Hand model failed to load");
+        setError(e instanceof Error ? e.message : "Could not load hand model");
       }
     }
 

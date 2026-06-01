@@ -10,6 +10,7 @@ type PlayUiLayerProps = {
   finale?: ReactNode;
   confetti?: ReactNode;
   chrome?: ReactNode;
+  floatingTop?: ReactNode;
   hud?: ReactNode;
   fps?: ReactNode;
   hands?: ReactNode;
@@ -23,6 +24,7 @@ export function PlayUiLayer({
   finale,
   confetti,
   chrome,
+  floatingTop,
   hud,
   fps,
   hands,
@@ -32,6 +34,7 @@ export function PlayUiLayer({
       {confetti ? <div className={styles.confetti}>{confetti}</div> : null}
       {fps ? <div className={styles.fps}>{fps}</div> : null}
       {chrome ? <div className={styles.chrome}>{chrome}</div> : null}
+      {floatingTop ? <div className={styles.floatingTop}>{floatingTop}</div> : null}
       {hud ? <div className={styles.hud}>{hud}</div> : null}
       {hands ? <div className={styles.hands}>{hands}</div> : null}
       {lobby ? <div className={styles.lobby}>{lobby}</div> : null}

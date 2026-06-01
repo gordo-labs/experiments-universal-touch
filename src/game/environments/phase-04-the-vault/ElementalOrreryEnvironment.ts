@@ -45,10 +45,10 @@ type TouchedParticle = {
 };
 
 const ELEMENTS: readonly ElementConfig[] = [
-  { id: "fire", label: "Fuego", color: 0xff5a3d, radius: 0.25, phase: 0.2 },
-  { id: "water", label: "Agua", color: 0x38bdf8, radius: 0.37, phase: 1.4 },
-  { id: "air", label: "Aire", color: 0xe8f7ff, radius: 0.49, phase: 2.6 },
-  { id: "earth", label: "Tierra", color: 0x8ee86f, radius: 0.61, phase: 3.8 },
+  { id: "fire", label: "Fire", color: 0xff5a3d, radius: 0.25, phase: 0.2 },
+  { id: "water", label: "Water", color: 0x38bdf8, radius: 0.37, phase: 1.4 },
+  { id: "air", label: "Air", color: 0xe8f7ff, radius: 0.49, phase: 2.6 },
+  { id: "earth", label: "Earth", color: 0x8ee86f, radius: 0.61, phase: 3.8 },
 ] as const;
 
 const ID = "phase-04";
@@ -214,7 +214,7 @@ export function createElementalOrreryEnvironment(): GameEnvironment {
     resetHintMs = 1400;
     runtime = {
       ...EMPTY_PHASE_RUNTIME,
-      statusHint: "Choque de colores: todo vuelve al inicio",
+      statusHint: "Color collision. Everything resets",
       handOverlayActive: true,
     };
   }
@@ -472,7 +472,7 @@ export function createElementalOrreryEnvironment(): GameEnvironment {
       disposed = false;
       runtime = {
         ...EMPTY_PHASE_RUNTIME,
-        statusHint: "Toca una estrella con cualquier índice para arrastrarla",
+        statusHint: "Touch a star with either index finger to drag it",
         handOverlayActive: true,
       };
 
@@ -640,14 +640,14 @@ export function createElementalOrreryEnvironment(): GameEnvironment {
             ? 0.86 + (finalHoldMs / FINAL_HOLD_MS) * 0.14
             : (placed / TOTAL_PARTICLES) * 0.86,
         statusHint: complete
-          ? "Portal cerrado"
+          ? "Portal sealed"
           : resetHintMs > 0
-            ? "Choque de colores: todo vuelve al inicio"
+            ? "Color collision. Everything resets"
             : charged
-                ? "Mantén el índice derecho en el núcleo"
+                ? "Hold your right index on the core"
               : captured
-                ? `${activeLabel}: toca su órbita sin chocar con otros colores`
-                : `Estrellas orbitando ${placed}/${TOTAL_PARTICLES}`,
+                ? `${activeLabel}: touch its orbit without hitting other colors`
+                : `Stars in orbit ${placed}/${TOTAL_PARTICLES}`,
         victoryLatched: runtime.victoryLatched || complete,
         phaseComplete: runtime.phaseComplete || complete,
         allSealsActive: charged,

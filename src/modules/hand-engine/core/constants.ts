@@ -50,3 +50,9 @@ export const FINGER_COLORS: Record<(typeof FINGER_NAMES)[number], number> = {
   ring: 0xff90ff,
   pinky: 0xffe066,
 };
+
+/** Hand overlay skeleton — matches UI Tron cyan (`--ts-cyan`). */
+export const OVERLAY_WIRE_HEX = 0x5ce8ff;
+export const OVERLAY_WIRE_STROKE = "rgba(92, 232, 255, 0.88)";
+export const OVERLAY_WIRE_FILL = "rgba(92, 232, 255, 0.92)";
+export const OVERLAY_WIRE_GLOW = "rgba(92, 232, 255, 0.65)";

@@ -1,0 +1,25 @@
+.arrow {
+  width: 2.75rem;
+  height: auto;
+  color: var(--ts-cyan);
+  filter: drop-shadow(0 0 8px var(--ts-cyan-glow-strong))
+    drop-shadow(0 0 16px var(--ts-cyan-glow));
+  animation: starMazeArrowPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes starMazeArrowPulse {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: translateX(-3px) scale(0.96);
+    filter: drop-shadow(0 0 6px var(--ts-cyan-glow))
+      drop-shadow(0 0 12px rgb(92 232 255 / 0.12));
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(4px) scale(1.05);
+    filter: drop-shadow(0 0 12px var(--ts-cyan-glow-strong))
+      drop-shadow(0 0 22px rgb(92 232 255 / 0.35));
+  }
+}

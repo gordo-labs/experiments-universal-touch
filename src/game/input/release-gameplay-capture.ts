@@ -1,6 +1,4 @@
-import { getFpsLookInput } from "@/game/environments/phase-02-silver-maze/fps-controls";
-
-/** Release pointer lock and FPS mouse capture so UI modals receive clicks. */
+/** Release pointer lock so UI modals receive clicks — keeps FPS listeners attached. */
 export function releaseGameplayCapture(): void {
   try {
     if (document.pointerLockElement) {
@@ -9,5 +7,4 @@ export function releaseGameplayCapture(): void {
   } catch {
     /* ignore */
   }
-  getFpsLookInput()?.detach();
 }

@@ -100,27 +100,28 @@ export function PhaseVictoryOverlay() {
         role="dialog"
         aria-modal="true"
         aria-labelledby="phase-victory-title"
+        onPointerDown={(event) => event.stopPropagation()}
       >
         <div className={styles.card}>
           <p className={styles.eyebrow}>{copy.eyebrow}</p>
           <h2 id="phase-victory-title" className={styles.title}>
-            {phase.gameLabel} — {phase.title}
+            {phase.gameLabel}: {phase.title}
           </h2>
           <p className={styles.body}>
-            Congrats, you made it at <strong>{formatElapsedMs(completedMs)}</strong>.
+            You cleared it in <strong>{formatElapsedMs(completedMs)}</strong>.
           </p>
           <p className={styles.subtitle}>{copy.body}</p>
           {isFinal ? (
             <button type="button" className={styles.cta} onClick={handleContinue}>
-              Ver final — confetti
+              Celebrate
             </button>
           ) : nextPhase ? (
             <>
               <p className={styles.hint}>
-                Siguiente: <strong>{nextPhase.gameLabel}</strong> — {nextPhase.title}
+                Next: <strong>{nextPhase.gameLabel}</strong>: {nextPhase.title}
               </p>
               <button type="button" className={styles.cta} onClick={handleContinue}>
-                Continuar a {nextPhase.gameLabel}
+                Continue to {nextPhase.gameLabel}
               </button>
             </>
           ) : null}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import "../styles/tron-ui.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ScapeRoom — hand-tracking escape game",
+  title: "Touching Stars",
   description:
-    "Online escape room with MediaPipe hand tracking, fingertip input, and Three.js 3D layer",
+    "An online escape room in four acts. Use your hands in front of the camera to touch stars and escape.",
 };
 
 export default function RootLayout({

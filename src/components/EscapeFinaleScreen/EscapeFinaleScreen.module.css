@@ -1,15 +1,222 @@
-.actions {
+.root {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backdrop {
+  composes: ts-backdrop from global;
+  overflow: hidden;
+  backdrop-filter: blur(6px);
+  background:
+    radial-gradient(ellipse 120% 90% at 50% 20%, rgb(140 120 255 / 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 50% 45%, rgb(92 232 255 / 0.16) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgb(255 200 120 / 0.08) 0%, transparent 50%),
+    rgb(2 4 10 / 0.78);
+  animation: finaleBackdropIn 1.2s ease-out;
+}
+
+.aurora {
+  position: absolute;
+  inset: -20%;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from 210deg at 50% 45%,
+      transparent 0deg,
+      rgb(92 232 255 / 0.12) 60deg,
+      rgb(180 140 255 / 0.14) 120deg,
+      rgb(255 210 140 / 0.08) 180deg,
+      transparent 240deg,
+      rgb(92 232 255 / 0.1) 300deg,
+      transparent 360deg
+    );
+  filter: blur(28px);
+  opacity: 0.85;
+  animation: finaleAurora 14s linear infinite;
+}
+
+.stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.75;
+  background-image:
+    radial-gradient(1px 1px at 10% 15%, rgb(255 255 255 / 0.95) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 22% 68%, rgb(92 232 255 / 0.9) 0%, transparent 100%),
+    radial-gradient(1px 1px at 35% 28%, rgb(255 255 255 / 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 48% 82%, rgb(255 220 160 / 0.75) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 58% 12%, rgb(92 232 255 / 0.85) 0%, transparent 100%),
+    radial-gradient(1px 1px at 72% 44%, rgb(255 255 255 / 0.65) 0%, transparent 100%),
+    radial-gradient(1px 1px at 84% 22%, rgb(200 180 255 / 0.8) 0%, transparent 100%),
+    radial-gradient(1.5px 1.5px at 90% 76%, rgb(92 232 255 / 0.7) 0%, transparent 100%),
+    radial-gradient(1px 1px at 6% 42%, rgb(255 255 255 / 0.55) 0%, transparent 100%),
+    radial-gradient(1px 1px at 64% 58%, rgb(255 255 255 / 0.5) 0%, transparent 100%);
+  animation: finaleStarsTwinkle 4s ease-in-out infinite alternate;
+}
+
+.cardWrap {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 24rem);
+  margin: 0 auto;
+}
+
+.cardHalo {
+  position: absolute;
+  inset: -30% -15%;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgb(92 232 255 / 0.28) 0%,
+    rgb(160 130 255 / 0.12) 35%,
+    transparent 68%
+  );
+  filter: blur(16px);
+  animation: finaleHaloPulse 3.5s ease-in-out infinite;
+}
+
+.card {
+  composes: ts-card ts-cardWide from global;
+  position: relative;
+  width: 100%;
+  margin: 0 auto;
+  overflow: hidden;
+  border-color: rgb(92 232 255 / 0.45);
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.06) inset,
+    0 0 48px rgb(92 232 255 / 0.35),
+    0 0 96px rgb(140 120 255 / 0.18),
+    0 28px 64px rgb(0 0 0 / 0.55);
+  animation:
+    ts-rise-in 0.65s ease-out,
+    finaleCardGlow 3s ease-in-out infinite;
+}
+
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgb(255 255 255 / 0.07) 48%,
+    transparent 66%
+  );
+  transform: translateX(-120%);
+  animation: finaleCardShimmer 4.5s ease-in-out infinite;
+}
+
+.crown {
+  position: relative;
+  width: 3.25rem;
+  height: 3.25rem;
+  margin: 0 auto 0.35rem;
+}
+
+.crownCore {
+  position: absolute;
+  inset: 0.65rem;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, rgb(255 255 255 / 0.95) 0%, rgb(92 232 255) 45%, rgb(120 90 255) 100%);
+  box-shadow:
+    0 0 18px rgb(92 232 255 / 0.9),
+    0 0 36px rgb(140 120 255 / 0.45);
+  animation: finaleCorePulse 2.4s ease-in-out infinite;
+}
+
+.crownRing {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1px solid rgb(92 232 255 / 0.55);
+  box-shadow:
+    0 0 16px rgb(92 232 255 / 0.35),
+    inset 0 0 12px rgb(92 232 255 / 0.15);
+  animation: finaleRingSpin 8s linear infinite;
+}
+
+.eyebrow {
+  composes: ts-eyebrow from global;
+  animation: finaleEyebrowGlow 2.8s ease-in-out infinite;
+}
+
+.title {
+  composes: ts-title from global;
+  margin-top: 0.65rem;
+  font-size: clamp(1.65rem, 5vw, 2.125rem);
+}
+
+.titleText {
+  display: inline-block;
+  background: linear-gradient(
+    100deg,
+    rgb(232 244 255) 0%,
+    rgb(92 232 255) 35%,
+    rgb(255 230 180) 55%,
+    rgb(200 180 255) 75%,
+    rgb(232 244 255) 100%
+  );
+  background-size: 220% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgb(92 232 255 / 0.45));
+  animation: finaleTitleShimmer 5s linear infinite;
+}
+
+.poem {
+  margin: 1.1rem auto 0;
+  max-width: 16rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
-  margin-top: 1.25rem;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.verse {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.45;
+  font-style: italic;
+  letter-spacing: 0.02em;
+  color: rgb(210 228 248 / 0.94);
+  text-shadow:
+    0 0 14px rgb(92 232 255 / 0.22),
+    0 0 28px rgb(255 200 120 / 0.1);
+  animation: finaleVerseFade 0.9s ease-out backwards;
+}
+
+.verse:nth-child(1) {
+  animation-delay: 0.15s;
+}
+
+.verse:nth-child(2) {
+  animation-delay: 0.3s;
+}
+
+.verse:nth-child(3) {
+  animation-delay: 0.45s;
+}
+
+.verse:nth-child(4) {
+  animation-delay: 0.6s;
+}
+
+.actions {
+  composes: ts-actions from global;
 }
 
 .results {
-  margin: 1rem 0 0;
+  margin: 1.15rem 0 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid rgb(255 255 255 / 0.1);
+  border-top: 1px solid rgb(92 232 255 / 0.22);
+  box-shadow: 0 -1px 0 rgb(255 255 255 / 0.04) inset;
 }
 
 .results li {
@@ -17,38 +224,187 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 0.55rem 0;
-  border-bottom: 1px solid rgb(255 255 255 / 0.08);
+  border-bottom: 1px solid rgb(92 232 255 / 0.1);
   font-size: 0.875rem;
-  color: rgb(212 212 216);
+  color: var(--ts-text-muted);
 }
 
 .time {
   font-family: var(--font-geist-mono, ui-monospace, monospace);
   font-variant-numeric: tabular-nums;
-  color: rgb(250 250 250);
+  color: var(--ts-text);
+  text-shadow: 0 0 10px var(--ts-cyan-glow);
 }
 
 .total {
   font-weight: 600;
-  color: rgb(253 224 71);
+  color: var(--ts-cyan);
+  text-shadow: 0 0 14px var(--ts-cyan-glow-strong);
 }
 
 .total .time {
-  color: rgb(253 224 71);
+  color: var(--ts-cyan);
 }
 
-.secondary {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  border: 1px solid rgb(255 255 255 / 0.12);
-  background: rgb(255 255 255 / 0.08);
-  color: rgb(244 244 245);
+.cta {
+  composes: ts-cta from global;
+  box-shadow:
+    0 0 24px var(--ts-cyan-glow),
+    0 0 48px rgb(92 232 255 / 0.12),
+    0 0 0 1px rgb(92 232 255 / 0.12) inset;
 }
 
-.secondary:hover {
-  background: rgb(255 255 255 / 0.12);
+.labs {
+  composes: ts-ctaGhost from global;
+  border-color: rgb(255 210 140 / 0.35);
+  background: linear-gradient(
+    180deg,
+    rgb(255 210 140 / 0.12) 0%,
+    rgb(92 232 255 / 0.06) 100%
+  );
+  color: rgb(255 235 210 / 0.95);
+  letter-spacing: 0.06em;
+  text-transform: lowercase;
+  box-shadow:
+    0 0 20px rgb(255 200 120 / 0.12),
+    inset 0 0 12px rgb(255 255 255 / 0.04);
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+}
+
+.labs:hover {
+  border-color: rgb(255 220 160 / 0.65);
+  background: linear-gradient(
+    180deg,
+    rgb(255 210 140 / 0.2) 0%,
+    rgb(92 232 255 / 0.1) 100%
+  );
+  box-shadow:
+    0 0 28px rgb(255 200 120 / 0.22),
+    0 0 40px rgb(92 232 255 / 0.15);
+  transform: translateY(-1px);
+}
+
+@keyframes finaleBackdropIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes finaleAurora {
+  from {
+    transform: rotate(0deg) scale(1);
+  }
+  to {
+    transform: rotate(360deg) scale(1.05);
+  }
+}
+
+@keyframes finaleStarsTwinkle {
+  from {
+    opacity: 0.55;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+
+@keyframes finaleHaloPulse {
+  0%,
+  100% {
+    opacity: 0.65;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@keyframes finaleCardGlow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.06) inset,
+      0 0 40px rgb(92 232 255 / 0.28),
+      0 0 80px rgb(140 120 255 / 0.14),
+      0 28px 64px rgb(0 0 0 / 0.55);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px rgb(255 255 255 / 0.1) inset,
+      0 0 56px rgb(92 232 255 / 0.42),
+      0 0 110px rgb(255 200 120 / 0.12),
+      0 28px 64px rgb(0 0 0 / 0.55);
+  }
+}
+
+@keyframes finaleCardShimmer {
+  0%,
+  35% {
+    transform: translateX(-120%);
+  }
+  55%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes finaleCorePulse {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes finaleRingSpin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes finaleEyebrowGlow {
+  0%,
+  100% {
+    text-shadow: 0 0 12px var(--ts-cyan-glow-strong);
+  }
+  50% {
+    text-shadow:
+      0 0 18px var(--ts-cyan-glow-strong),
+      0 0 28px rgb(255 200 120 / 0.25);
+  }
+}
+
+@keyframes finaleTitleShimmer {
+  from {
+    background-position: 0% center;
+  }
+  to {
+    background-position: 220% center;
+  }
+}
+
+@keyframes finaleVerseFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

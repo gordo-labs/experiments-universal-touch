@@ -1,0 +1,45 @@
+.root {
+  position: fixed;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 40;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.toggle {
+  pointer-events: auto;
+  padding: 0.4rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1px solid var(--ts-cyan-border);
+  background: rgb(8 14 28 / 0.75);
+  backdrop-filter: blur(8px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ts-text-muted);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--ts-cyan-glow);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    color 0.2s ease;
+}
+
+.toggle:hover {
+  border-color: rgb(92 232 255 / 0.5);
+  color: var(--ts-text);
+}
+
+.toggleOn {
+  border-color: rgb(92 232 255 / 0.6);
+  color: var(--ts-cyan);
+  box-shadow: 0 0 18px var(--ts-cyan-glow-strong);
+}
+
+.panel {
+  pointer-events: auto;
+}

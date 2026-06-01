@@ -7,45 +7,41 @@ export type PhasePlayHints = {
 
 export const PHASE_PLAY_HINTS: Record<PuzzlePhaseId, PhasePlayHints> = {
   "phase-01": {
-    objective: "Activa los cinco sellos y toca el núcleo central con el índice.",
+    objective: "Wake the five seals, then reach the heart of the threshold.",
     steps: [
-      "Muestra ambas manos a la cámara.",
-      "Junta las yemas del mismo dedo en ambas manos (pinch) para activar cada sello.",
-      "Activa los cinco dedos: pulgar, índice, medio, anular y meñique.",
-      "Cuando el portal brille, acerca el índice al núcleo central en pantalla.",
+      "Keep both hands in view. The space between them matters.",
+      "Wake each seal by mirroring fingertips, or touch its orb with the matching finger.",
+      "All five must answer before the center opens.",
+      "When it calls to you, let your index find the core.",
     ],
   },
   "phase-02": {
-    objective: "Recorre el laberinto y pinta las cinco esferas de rojo con el pulgar.",
+    objective: "Find the five lights in the maze and turn them all red.",
     steps: [
-      "Usa W/A/S/D para moverte y el ratón para mirar (clic para capturar el ratón).",
-      "Encuentra las cinco esferas en las paredes del laberinto.",
-      "Muestra las manos: verás el overlay de dedos sobre la escena.",
-      "Toca cada esfera en pantalla con la yema del dedo cuyo color quieras pintar.",
-      "Las cinco esferas deben quedar en rojo (color del pulgar) para ganar.",
+      "Walk the labyrinth with keyboard to move and mouse to look around.",
+      "The circles above mirror the spheres on the walls.",
+      "Bring your hands in and touch a sphere with the finger whose color you want to leave on it.",
+      "Red belongs to the thumb. When every light agrees, the maze follows.",
     ],
   },
   "phase-03": {
     objective:
-      "Conecta tres estrellas de color (pulgar, índice y medio) con su par en la columna derecha.",
+      "Draw three paths across the field, each color from the left to its twin on the right.",
     steps: [
-      "Muestra la mano derecha a la cámara.",
-      "Usa el índice derecho (círculo blanco) para tocar estrellas.",
-      "Toca una estrella de color en la columna izquierda para empezar ese color.",
-      "Toca estrellas grises para fijar segmentos del rayo.",
-      "Llega a la estrella del mismo color en la columna derecha.",
-      "No cruces rayos de otro color ni cierres un bucle sobre tu propia línea.",
-      "Completa los tres colores para ganar.",
+      "Your right index is the beam; keep that hand visible.",
+      "Start from a colored star on the left. That hue is yours until the path is complete.",
+      "Pale stars can anchor the beam; use them to route around what blocks you.",
+      "Find the matching star on the right without crossing another color or doubling back on your own.",
+      "Three colors, three crossings.",
     ],
   },
   "phase-04": {
-    objective: "Lleva cada estrella elemental a su órbita y sella el núcleo con el índice derecho.",
+    objective: "Set every star in motion, then close the portal at the center.",
     steps: [
-      "Toca una estrella libre con el índice para capturarla.",
-      "Arrástrala hasta el anillo de su mismo elemento.",
-      "Repítelo con todas las estrellas hasta que orbiten.",
-      "Evita choques entre estrellas de distinto color (reinician el puzzle).",
-      "Con todas en órbita, mantén el índice derecho sobre el núcleo central.",
+      "Touch a loose star with your index and it will follow you.",
+      "Each star has a ring that suits it; guide it there patiently.",
+      "Different hues don't forgive a collision. The field resets if they meet.",
+      "When all are circling, hold your right index on the core until the portal seals.",
     ],
   },
 };

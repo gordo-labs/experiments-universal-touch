@@ -86,8 +86,11 @@ export function createPhaseOneEnvironment(): GameEnvironment {
 
   function allSealsActive(
     interactions: EnvironmentTick["interactions"],
+    sealProximityActive: Partial<Record<FingerName, boolean>>,
   ): boolean {
-    return FINGER_NAMES.every((f) => interactions[f].active);
+    return FINGER_NAMES.every(
+      (f) => interactions[f].active || sealProximityActive[f] === true,
+    );
   }
 
   function cycleCoreColor(elapsed: number, target: THREE.Color) {
@@ -329,7 +332,7 @@ export function createPhaseOneEnvironment(): GameEnvironment {
       if (grid) grid.position.y = -0.05 + Math.sin(elapsed * 0.5) * 0.008;
       if (fogParticles) fogParticles.rotation.z = elapsed * 0.03;
 
-      const sealsReady = allSealsActive(interactions);
+      const sealProximityActive: Partial<Record<FingerName, boolean>> = {};
       let portalCharge = 0;
 
       for (const seal of seals) {
@@ -347,12 +350,15 @@ export function createPhaseOneEnvironment(): GameEnvironment {
           }
         }
 
-        const targetActivation =
-          nearest < PROXIMITY_RADIUS
-            ? 1 - nearest / PROXIMITY_RADIUS
-            : interactions[seal.finger].active
-              ? 0.65
-              : 0;
+        const touchingSeal = nearest < PROXIMITY_RADIUS;
+        sealProximityActive[seal.finger] = touchingSeal;
+
+        const pinchActive = interactions[seal.finger].active;
+        const targetActivation = touchingSeal
+          ? 1 - nearest / PROXIMITY_RADIUS
+          : pinchActive
+            ? 0.65
+            : 0;
 
         seal.activation += (targetActivation - seal.activation) * Math.min(1, dt * ACTIVATE_LERP);
         portalCharge += seal.activation;
@@ -371,6 +377,8 @@ export function createPhaseOneEnvironment(): GameEnvironment {
         (seal.ring.material as THREE.MeshBasicMaterial).opacity = a * 0.85;
         seal.ring.scale.setScalar(1 + a * 0.6);
       }
+
+      const sealsReady = allSealsActive(interactions, sealProximityActive);
 
       if (portal && portalGlow) {
         const charge = Math.min(portalCharge / FINGER_NAMES.length, 1);
@@ -431,7 +439,9 @@ export function createPhaseOneEnvironment(): GameEnvironment {
       const coreOrbTouched =
         runtime.coreOrbTouched ||
         shouldTriggerCoreVictory(coreTouch, sealsReady);
-      const activeSealCount = FINGER_NAMES.filter((f) => interactions[f].active).length;
+      const activeSealCount = FINGER_NAMES.filter(
+        (f) => interactions[f].active || sealProximityActive[f] === true,
+      ).length;
       const progress = coreOrbTouched
         ? 1
         : sealsReady
@@ -441,10 +451,10 @@ export function createPhaseOneEnvironment(): GameEnvironment {
       runtime = {
         progress,
         statusHint: coreOrbTouched
-          ? "Núcleo tocado"
+          ? "Core touched"
           : sealsReady
-            ? "Mete el índice en la bola central"
-            : `Sellos ${activeSealCount}/${FINGER_NAMES.length}`,
+            ? "Bring your index finger to the central orb"
+            : `Seals ${activeSealCount}/${FINGER_NAMES.length}`,
         victoryLatched: runtime.victoryLatched || coreOrbTouched,
         phaseComplete: runtime.phaseComplete || coreOrbTouched,
         allSealsActive: sealsReady,

@@ -55,7 +55,7 @@ export function PhaseHud() {
       )}
 
       {victoryPanelOpen && (
-        <p className={styles.ok}>Modal de victoria abierto</p>
+        <p className={styles.ok}>Victory modal open</p>
       )}
 
       {sessionStatus === "playing" && currentPhaseId === "phase-01" && activeFingers.length > 0 && !runtime.allSealsActive && (

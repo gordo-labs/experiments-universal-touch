@@ -2,8 +2,8 @@
   position: fixed;
   inset: 0;
   z-index: 1000;
-  /* Capture hits on the UI shell; pass-through slots opt out individually. */
-  pointer-events: auto;
+  /* Pass clicks through to the 3D stage; children opt in with pointer-events: auto. */
+  pointer-events: none;
 }
 
 .confetti {
@@ -72,5 +72,12 @@
   position: absolute;
   inset: 0;
   z-index: 30;
+  pointer-events: none;
+}
+
+.floatingTop {
+  position: absolute;
+  inset: 0;
+  z-index: 35;
   pointer-events: none;
 }

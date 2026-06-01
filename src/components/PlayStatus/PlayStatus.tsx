@@ -12,10 +12,10 @@ export function PlayStatus() {
   if (error) {
     return (
       <div className={styles.banner} role="alert">
-        <p className={styles.errorTitle}>Cannot start play mode</p>
+        <p className={styles.errorTitle}>Cannot start</p>
         <p className={styles.errorBody}>{error}</p>
         <p className={styles.hint}>
-          Camera access requires HTTPS or localhost. Allow camera permission and reload.
+          Allow camera access in your browser settings and try again.
         </p>
       </div>
     );
@@ -30,9 +30,9 @@ export function PlayStatus() {
     return (
       <div className={styles.banner}>
         <p className={styles.loading}>
-          {trackingStatus === "loading-model"
-            ? "Loading hand model…"
-            : "Starting camera…"}
+        {trackingStatus === "loading-model"
+          ? "Getting ready…"
+          : "Connecting to camera…"}
         </p>
       </div>
     );

@@ -5,7 +5,7 @@ import { HandLandmarker } from "@mediapipe/tasks-vision";
 import { useCamera } from "@/contexts/camera";
 import { useHandTracking } from "@/contexts/hand-tracking";
 import { useFingersStore } from "@/contexts/fingers";
-import { FINGER_COLORS, FINGER_NAMES } from "@/lib/hand-tracking/constants";
+import { FINGER_COLORS, FINGER_NAMES, OVERLAY_WIRE_FILL, OVERLAY_WIRE_STROKE } from "@/lib/hand-tracking/constants";
 import styles from "./HandOverlay.module.css";
 
 /** 2D skeleton + fingertip halos — same wiring as camera_ar overlay canvas. */
@@ -100,9 +100,9 @@ export function HandOverlay() {
         const cat = result.handedness?.[i]?.[0]?.categoryName;
         const lm = result.landmarks[i];
         if (cat === "Left") {
-          drawHand(lm, "rgba(34,211,238,0.85)", "rgba(34,211,238,0.95)", "left");
+          drawHand(lm, OVERLAY_WIRE_STROKE, OVERLAY_WIRE_FILL, "left");
         } else if (cat === "Right") {
-          drawHand(lm, "rgba(244,114,182,0.85)", "rgba(244,114,182,0.95)", "right");
+          drawHand(lm, OVERLAY_WIRE_STROKE, OVERLAY_WIRE_FILL, "right");
         }
       }
     };

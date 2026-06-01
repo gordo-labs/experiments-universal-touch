@@ -10,6 +10,14 @@
   color: #fafafa;
 }
 
+.eyebrow {
+  margin: 0;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fbbf24;
+}
+
 .title {
   margin: 0;
   font-size: 1.75rem;

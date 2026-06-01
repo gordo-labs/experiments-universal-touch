@@ -50,6 +50,7 @@ export function PlayLeftControls() {
     phaseStartedAt,
     phaseTimes,
     victoryPanelOpen,
+    welcomeOpen,
     resetCurrentPhase,
     endSession,
   } = useGameSession();
@@ -60,7 +61,7 @@ export function PlayLeftControls() {
   const [resetOpen, setResetOpen] = useState(false);
   const [hintsOpen, setHintsOpen] = useState(false);
 
-  const showGameControls = sessionStatus === "playing" && !victoryPanelOpen;
+  const showGameControls = sessionStatus === "playing" && !victoryPanelOpen && !welcomeOpen;
   const assistModalOpen = homeOpen || resetOpen || hintsOpen;
 
   useEffect(() => {
@@ -157,8 +158,8 @@ export function PlayLeftControls() {
             <p className={styles.eyebrow}>Home</p>
             <h2 className={styles.title}>Leave and start over?</h2>
             <p className={styles.body}>
-              Volverás al menú principal. Se perderá el progreso de esta partida en{" "}
-              <strong>{phase.gameLabel}</strong>.
+              You will return to the intro. Progress in <strong>{phase.gameLabel}</strong> will
+              be lost.
             </p>
             <div className={styles.actions}>
               <button type="button" className={styles.cta} onClick={confirmHome}>
@@ -182,8 +183,8 @@ export function PlayLeftControls() {
             <p className={styles.eyebrow}>Reset</p>
             <h2 className={styles.title}>Restart {phase.gameLabel}?</h2>
             <p className={styles.body}>
-              Se reiniciará <strong>{phase.title}</strong> desde el principio y el
-              cronómetro de este juego volverá a cero.
+              <strong>{phase.title}</strong> will restart from the beginning and this game&apos;s
+              timer will reset.
             </p>
             <div className={styles.actions}>
               <button type="button" className={styles.ctaDanger} onClick={confirmReset}>
@@ -206,7 +207,7 @@ export function PlayLeftControls() {
           <div className={styles.card}>
             <p className={styles.eyebrow}>Hints</p>
             <h2 className={styles.title}>
-              {phase.gameLabel} — {phase.title}
+              {phase.gameLabel}: {phase.title}
             </h2>
             <p className={styles.body}>{hints.objective}</p>
             <ol className={styles.steps}>
