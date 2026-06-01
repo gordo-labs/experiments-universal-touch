@@ -53,8 +53,20 @@ const SPHERE_WALL_OFFSET = WALL_THICK / 2 + SPHERE_RADIUS * 0.42;
 const LIGHT_MIN_SPACING = CELL_SIZE * 2.8;
 const ALL_RED_PAUSE_SEC = 2.5;
 const RED_WASH_DURATION_SEC = 3;
+/** Show color beacons on every unfinished sphere after this many seconds. */
+const SPHERE_HINT_AFTER_SEC = 60;
+const HINT_BEACON_HEIGHT = 3.6;
+const HINT_BEACON_RANGE = 28;
 
 const INITIAL_LIGHT_COLORS = FINGER_NAMES.map((f) => FINGER_COLORS[f]);
+
+type HintBeacon = {
+  group: THREE.Group;
+  point: THREE.PointLight;
+  pillar: THREE.Mesh;
+  crown: THREE.Mesh;
+  color: number | null;
+};
 
 type LightEmitter = {
   slot: WallSlot;
@@ -103,6 +115,7 @@ export function createSilverMazeEnvironment(): GameEnvironment {
   let tronSurface: THREE.MeshPhysicalMaterial | null = null;
   let tronEdgeMaterial: THREE.LineBasicMaterial | null = null;
   let allRedSince: number | null = null;
+  let hintBeacons: HintBeacon[] = [];
 
   function track<T extends THREE.Material>(mat: T): T {
     disposables.push(mat);
@@ -220,6 +233,80 @@ export function createSilverMazeEnvironment(): GameEnvironment {
     emitter.point.intensity = isThumbRed(color) ? 1.4 : 1;
   }
 
+  function createHintBeacon(scene: THREE.Scene): HintBeacon {
+    const group = new THREE.Group();
+    group.visible = false;
+    group.renderOrder = 8;
+
+    const pillar = new THREE.Mesh(
+      trackGeo(new THREE.CylinderGeometry(0.045, 0.07, HINT_BEACON_HEIGHT, 12, 1, true)),
+      track(
+        new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.55,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+        }),
+      ),
+    );
+    pillar.position.y = HINT_BEACON_HEIGHT / 2;
+    group.add(pillar);
+
+    const crown = new THREE.Mesh(
+      trackGeo(new THREE.SphereGeometry(0.16, 16, 16)),
+      track(
+        new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          transparent: true,
+          opacity: 0.85,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false,
+        }),
+      ),
+    );
+    crown.position.y = HINT_BEACON_HEIGHT + 0.08;
+    group.add(crown);
+
+    const point = new THREE.PointLight(0xffffff, 0, HINT_BEACON_RANGE, 1.35);
+    point.position.y = HINT_BEACON_HEIGHT;
+    group.add(point);
+
+    scene.add(group);
+    return { group, point, pillar, crown, color: null };
+  }
+
+  function setHintBeaconColor(beacon: HintBeacon, color: number) {
+    (beacon.pillar.material as THREE.MeshBasicMaterial).color.setHex(color);
+    (beacon.crown.material as THREE.MeshBasicMaterial).color.setHex(color);
+    beacon.point.color.setHex(color);
+  }
+
+  function updateHintBeacon(beacon: HintBeacon, emitter: LightEmitter, elapsed: number) {
+    const pulse = 0.72 + 0.28 * Math.sin(elapsed * 3.2);
+    const bob = 0.025 * Math.sin(elapsed * 2 + emitter.world.x * 0.5);
+    const baseY = emitter.world.y + bob;
+
+    beacon.group.position.set(emitter.world.x, baseY, emitter.world.z);
+    beacon.group.visible = true;
+    beacon.point.intensity = 2.4 * pulse;
+    (beacon.pillar.material as THREE.MeshBasicMaterial).opacity = 0.35 + 0.25 * pulse;
+    (beacon.crown.material as THREE.MeshBasicMaterial).opacity = 0.65 + 0.3 * pulse;
+    beacon.crown.scale.setScalar(0.95 + 0.12 * pulse);
+  }
+
+  function hideHintBeacon(beacon: HintBeacon | null) {
+    if (!beacon) return;
+    beacon.group.visible = false;
+    beacon.point.intensity = 0;
+    beacon.color = null;
+  }
+
+  function hideAllHintBeacons() {
+    for (const beacon of hintBeacons) hideHintBeacon(beacon);
+  }
+
   return {
     id,
 
@@ -228,6 +315,7 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       touchPulse = 0;
       lights.length = 0;
       allRedSince = null;
+      hintBeacons = [];
       tronSurface = null;
       tronEdgeMaterial = null;
 
@@ -295,6 +383,8 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       });
 
       applyFpsCamera(camera, player);
+
+      hintBeacons = Array.from({ length: LIGHT_COUNT }, () => createHintBeacon(scene));
     },
 
     tick({ fingers, dt, elapsed, camera }: EnvironmentTick) {
@@ -337,6 +427,32 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       const sphereColors = lights.map((l) => l.color);
       const redCount = sphereColors.filter((c) => isThumbRed(c)).length;
       const allRed = allLightsRed(sphereColors);
+      const nonRedLights = lights.filter((light) => !isThumbRed(light.color));
+      const showSphereHints =
+        elapsed >= SPHERE_HINT_AFTER_SEC &&
+        nonRedLights.length > 0 &&
+        allRedSince === null &&
+        !runtime.victoryLatched;
+
+      if (showSphereHints) {
+        for (let i = 0; i < lights.length; i++) {
+          const emitter = lights[i];
+          const beacon = hintBeacons[i];
+          if (!beacon) continue;
+          if (isThumbRed(emitter.color)) {
+            hideHintBeacon(beacon);
+            continue;
+          }
+          if (beacon.color !== emitter.color) {
+            setHintBeaconColor(beacon, emitter.color);
+            beacon.color = emitter.color;
+          }
+          updateHintBeacon(beacon, emitter, elapsed);
+        }
+      } else {
+        hideAllHintBeacons();
+      }
+
       let redWash = runtime.mazeRedWash ?? 0;
       let victoryLatched = runtime.victoryLatched;
 
@@ -368,7 +484,9 @@ export function createSilverMazeEnvironment(): GameEnvironment {
             ? "The maze turns red…"
             : allRed
               ? "All five lights are red…"
-              : touch.touching
+              : showSphereHints
+                ? "Follow the beacons — lights still waiting"
+                : touch.touching
                 ? "Color applied. Thumb = red to win"
                 : handsVisible
                   ? "Touch the on-screen sphere with the finger color you want"
@@ -421,6 +539,10 @@ export function createSilverMazeEnvironment(): GameEnvironment {
       tronSurface = null;
       tronEdgeMaterial = null;
       allRedSince = null;
+      for (const beacon of hintBeacons) {
+        beacon.group.parent?.remove(beacon.group);
+      }
+      hintBeacons = [];
       maze = null;
       runtime = { ...EMPTY_PHASE_RUNTIME };
     },
